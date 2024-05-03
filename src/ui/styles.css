@@ -1,0 +1,8 @@
+tr, th, table,td {
+    border: 2px solid black;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}

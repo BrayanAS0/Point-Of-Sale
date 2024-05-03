@@ -1,0 +1,21 @@
+{
+  "name": "proyect",
+  "version": "1.0.0",
+  "main": "src\\ui\\main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^3.9.7"
+  },
+  "description": "",
+  "devDependencies": {
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "electron": "^30.0.1"
+  }
+}
