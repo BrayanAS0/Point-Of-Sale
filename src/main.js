@@ -20,7 +20,7 @@ const createWindow = () => {
   });
 
   console.log('Cargando archivo HTML...');
-  win.loadFile('D:\\Cursos\\Electron js\\src\\ui\\index.html');
+  win.loadFile('D:\\Cursos\\Electron js\\Point-Of-Sale\\src\\ui\\index.html');
 };
 
 app.whenReady().then(() => {
