@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bootstrap-icons": "^1.11.3",
     "mysql2": "^3.9.7"
   },
   "description": "",
