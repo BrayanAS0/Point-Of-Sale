@@ -1,42 +1,50 @@
-const { ipcRenderer } = require('electron');
+// Obtener todas las celdas editables
+const editableCells = document.querySelectorAll('.editable');
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM cargado');
+// Agregar eventos a cada celda editable
+editableCells.forEach(cell => {
+    // Agregar evento de clic
+    cell.addEventListener('click', () => {
+        makeEditable(cell);
+    });
 
-  document.getElementById('consultarBtn').addEventListener('click', () => {
-    console.log('Botón de consulta clickeado');
-    ipcRenderer.send('consultar-estudiantes');
+    // Agregar evento de pasar el mouse
+    cell.addEventListener('mouseover', () => {
+        cell.style.backgroundColor = '#f0f0f0';
+    });
+
+    // Agregar evento de quitar el mouse
+    cell.addEventListener('mouseout', () => {
+        cell.style.backgroundColor = '';
+    });
+});
+
+// Función para hacer una celda editable
+function makeEditable(cell) {
+  const originalValue = cell.textContent;
+  cell.innerHTML = `<input type="text" value="${originalValue}">`;
+  const input = cell.querySelector('input');
+  input.focus();
+
+  // Seleccionar todo el texto del campo de entrada
+  input.select();
+
+  // Guardar el valor editado al perder el foco
+  input.addEventListener('blur', () => {
+      const newValue = input.value;
+      cell.textContent = newValue;
   });
-});
 
-ipcRenderer.on('estudiantes-consultados', (event, estudiantes) => {
-  console.log('Resultados recibidos en el proceso de renderizado:', estudiantes);
+  // Guardar el valor editado al presionar Enter
+  input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+          const newValue = input.value;
+          cell.textContent = newValue;
+      }
+  });
+}
 
-  const resultadosDiv = document.getElementById('resultados');
-  resultadosDiv.innerHTML = '';
-
-  if (estudiantes.length === 0) {
-    resultadosDiv.textContent = 'No se encontraron estudiantes.';
-  } else {
-    const table = document.createElement('table');
-    const headerRow = document.createElement('tr');
-    ['Matrícula', 'Nombre', 'Correo', 'Teléfono', 'Edad'].forEach(header => {
-      const th = document.createElement('th');
-      th.textContent = header;
-      headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
-
-    estudiantes.forEach(estudiante => {
-      const row = document.createElement('tr');
-      ['matricula', 'nombre', 'correo', 'telefono', 'edad'].forEach(key => {
-        const td = document.createElement('td');
-        td.textContent = estudiante[key];
-        row.appendChild(td);
-      });
-      table.appendChild(row);
-    });
-
-    resultadosDiv.appendChild(table);
-  }
-});
+function deleteRow(button) {
+  const row = button.closest('tr');
+  row.remove();
+}
