@@ -1,50 +1,69 @@
-// Obtener todas las celdas editables
-const editableCells = document.querySelectorAll('.editable');
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const codeInput = document.getElementById('code-input');
+    const nameInput = document.getElementById('name-input');
+    const categoryInput = document.getElementById('category-input');
+    const quantityInput = document.getElementById('quantity-input');
+    const priceInput = document.getElementById('price-input');
+    const addButton = document.getElementById('Button-For-Input');
+    const tableBody = document.getElementById('table-body');
+    const totalDisplay = document.getElementById('total-display');
+    const printButton = document.getElementById('print-button');
+    const finishButton = document.getElementById('finish-button');
 
-// Agregar eventos a cada celda editable
-editableCells.forEach(cell => {
-    // Agregar evento de clic
-    cell.addEventListener('click', () => {
-        makeEditable(cell);
+    let total = 0;
+
+    addButton.addEventListener('click', function() {
+        const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
+        const category = categoryInput.value.trim();
+        const quantity = parseInt(quantityInput.value);
+        const price = parseFloat(priceInput.value);
+        
+        if (code && name && category && quantity && price) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${code}</td>
+                <td>${name}</td>
+                <td>${category}</td>
+                <td>${quantity}</td>
+                <td>$${price.toFixed(2)}</td>
+                <td>$${(quantity * price).toFixed(2)}</td>
+                <td><button class="delete-button">X</button></td>
+            `;
+            
+            tableBody.appendChild(row);
+            
+            total += quantity * price;
+            totalDisplay.textContent = `$${total.toFixed(2)}`;
+            
+            codeInput.value = '';
+            nameInput.value = '';
+            categoryInput.value = '';
+            quantityInput.value = '';
+            priceInput.value = '';
+        }
     });
 
-    // Agregar evento de pasar el mouse
-    cell.addEventListener('mouseover', () => {
-        cell.style.backgroundColor = '#f0f0f0';
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-button')) {
+            const row = e.target.parentElement.parentElement;
+            const subtotal = parseFloat(row.children[5].textContent.slice(1));
+            
+            total -= subtotal;
+            totalDisplay.textContent = `$${total.toFixed(2)}`;
+            
+            row.remove();
+        }
     });
 
-    // Agregar evento de quitar el mouse
-    cell.addEventListener('mouseout', () => {
-        cell.style.backgroundColor = '';
+    printButton.addEventListener('click', function() {
+        window.print();
+    });
+
+    finishButton.addEventListener('click', function() {
+        tableBody.innerHTML = '';
+        total = 0;
+        totalDisplay.textContent = '$0.00';
     });
 });
-
-// Función para hacer una celda editable
-function makeEditable(cell) {
-  const originalValue = cell.textContent;
-  cell.innerHTML = `<input type="text" value="${originalValue}">`;
-  const input = cell.querySelector('input');
-  input.focus();
-
-  // Seleccionar todo el texto del campo de entrada
-  input.select();
-
-  // Guardar el valor editado al perder el foco
-  input.addEventListener('blur', () => {
-      const newValue = input.value;
-      cell.textContent = newValue;
-  });
-
-  // Guardar el valor editado al presionar Enter
-  input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-          const newValue = input.value;
-          cell.textContent = newValue;
-      }
-  });
-}
-
-function deleteRow(button) {
-  const row = button.closest('tr');
-  row.remove();
-}
