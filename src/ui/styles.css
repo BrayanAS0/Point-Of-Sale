@@ -86,3 +86,6 @@ button {
   height: 100px;
   display: inline-block;
 }
+#finish-button:hover,#print-button:hover{
+  background-color: #e83838;
+}
