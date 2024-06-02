@@ -9,7 +9,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const tableBody = document.getElementById('table-body');
     const totalDisplay = document.getElementById('total-display');
     const printButton = document.getElementById('print-button');
-    const finishButton = document.getElementById('finish-button');
+    const finishButton = document.getElementById('finished-button');
+
+    finishButton.addEventListener('click', function() {
+        console.log('Botón Finalizar clickeado');
+
+        const totalAmount = total.toFixed(2);
+        console.log('Total:', totalAmount);
+
+        const receivedAmount = parseFloat(prompt(`El total de la compra es $${totalAmount}. Ingrese la cantidad recibida:`));        console.log('Cantidad recibida:', receivedAmount);
+
+        if (!isNaN(receivedAmount)) {
+            const change = receivedAmount - totalAmount;
+
+            if (change >= 0) {
+                alert(`Cambio a entregar: $${change.toFixed(2)}`);
+            } else {
+                alert(`Falta dinero por pagar: $${Math.abs(change).toFixed(2)}`);
+            }
+
+            tableBody.innerHTML = '';
+            total = 0;
+            totalDisplay.textContent = '$0.00';
+        } else {
+            alert('Cantidad inválida. Por favor, ingrese un número válido.');
+        }
+    });
+
 
     let total = 0;
 
@@ -26,16 +52,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${code}</td>
                 <td>${name}</td>
                 <td>${category}</td>
-                <td>${quantity}</td>
-                <td>$${price.toFixed(2)}</td>
+                <td class="editable">${quantity}</td>
+                <td class="editable">$${price.toFixed(2)}</td>
                 <td>$${(quantity * price).toFixed(2)}</td>
-                <td><button class="delete-button">X</button></td>
+                <td class="td-delete"><button class="delete-button">X</button></td>
             `;
+            
+            // Agregar evento de clic solo a las celdas de cantidad y precio
+            row.querySelectorAll('td.editable').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    const input = document.createElement('input');
+                    input.value = cell.textContent.replace('$', '');
+                    cell.textContent = '';
+                    cell.appendChild(input);
+                    input.focus();
+                    
+                    // Validar que solo se ingresen números
+                    input.addEventListener('input', function() {
+                        input.value = input.value.replace(/[^0-9.]/g, '');
+                    });
+                    
+                    // Actualizar valor de la celda al perder el enfoque o presionar Enter
+                    input.addEventListener('blur', updateCellValue);
+                    input.addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            updateCellValue();
+                        }
+                    });
+                    
+                    function updateCellValue() {
+                        const newValue = input.value.trim();
+                        cell.textContent = cell.classList.contains('price') ? `$${newValue}` : newValue;
+                        updateTotal();
+                    }
+                });
+            });
             
             tableBody.appendChild(row);
             
-            total += quantity * price;
-            totalDisplay.textContent = `$${total.toFixed(2)}`;
+            updateTotal();
             
             codeInput.value = '';
             nameInput.value = '';
@@ -61,9 +116,17 @@ document.addEventListener('DOMContentLoaded', function() {
         window.print();
     });
 
-    finishButton.addEventListener('click', function() {
-        tableBody.innerHTML = '';
+
+
+    function updateTotal() {
         total = 0;
-        totalDisplay.textContent = '$0.00';
-    });
+        tableBody.querySelectorAll('tr').forEach(row => {
+            const quantity = parseInt(row.cells[3].textContent);
+            const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+            const subtotal = quantity * price;
+            row.cells[5].textContent = `$${subtotal.toFixed(2)}`;
+            total += subtotal;
+        });
+        totalDisplay.textContent = `$${total.toFixed(2)}`;
+    }
 });

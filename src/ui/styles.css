@@ -45,6 +45,7 @@ main {
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th, td {
@@ -53,9 +54,39 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
+th:nth-child(1), td:nth-child(1) {
+  width: 20%;
+}
+
+th:nth-child(2), td:nth-child(2) {
+  width: 20%;
+}
+
+th:nth-child(3), td:nth-child(3) {
+  width: 15%;
+}
+
+th:nth-child(4), td:nth-child(4) {
+  width: 10%;
+}
+
+th:nth-child(5), td:nth-child(5) {
+  width: 15%;
+}
+
+th:nth-child(6), td:nth-child(6) {
+  width: 15%;
+}
+
+th:nth-child(7), td:nth-child(7) {
+  width: 5%;
+  height: 100%;
+}
+
 .sidebar {
   width: 300px;
   margin-left: 20px;
+  height: 100%;
 }
 
 form {
@@ -80,15 +111,56 @@ button {
 .action-buttons button {
   padding: 10px 20px;
   margin-right: 10px;
+  height: 300px;
+
 }
-#finished-button,#print-button{
+
+.delete-button{
   width: 100%;
-  height: 100px;
+  height: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  border: none;
+  background-color: #beaeae;
+
+}
+#finished-button{
+  width: 100%;
+  height: 160px;
   display: inline-block;
   background-color: #ddd;
   transition-property: background-color;
   transition-duration: 0.5s;
 }
-#finished-button:hover,#print-button:hover{
-  background-color: #e83838;
+#finished-button:hover,.delete-button
+{
+  background-color: #fe0303;
+}
+td input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  text-align: center;
+  font-size: inherit;
+  font-family: inherit;
+}
+#modal_content{
+  background-color: #fe0303;
+  width: 40vw;
+  height: 30vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+bottom: 0;
+margin: auto;
+}
+#modal-button{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8%;
 }

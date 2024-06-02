@@ -6,7 +6,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'root',
-  database: 'Programacioniii'
+  database: 'pos'
 });
 
 const createWindow = () => {
@@ -68,3 +68,6 @@ ipcMain.on('consultar-estudiantes', (event) => {
     event.reply('estudiantes-consultados', results);
   });
 });
+
+
+///
