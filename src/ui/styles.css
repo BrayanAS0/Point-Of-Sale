@@ -8,6 +8,7 @@ body {
 #Button-For-Input {
   transition-property: background-color;
   transition-duration: 0.5s;
+  height: 20%;
 }
 
 .container {
@@ -25,6 +26,7 @@ nav ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 nav li {
@@ -34,12 +36,18 @@ nav li {
 nav a {
   color: #fff;
   text-decoration: none;
+  width: 100%;
+  display: inline-block;
+font-size: 25px;
 }
 
 main {
   flex: 1;
   padding: 20px;
   display: flex;
+}
+#search-form{
+  height: 50;
 }
 
 .table-container {
@@ -57,9 +65,10 @@ th, td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  font-size: 20px;
 }
 
-th:nth-child(even) {
+tr:nth-child(even) {
   background-color: #ddd;
 }
 
@@ -84,7 +93,7 @@ th:nth-child(5), td:nth-child(5) {
 }
 
 th:nth-child(6), td:nth-child(6) {
-  width: 15%;
+  width: 20%;
 }
 
 th:nth-child(7), td:nth-child(7) {
@@ -130,6 +139,8 @@ button {
   box-sizing: border-box;
   border: none;
   background-color: #beaeae;
+  transition-property: background-color;
+  transition-duration: 0.5s;
 }
 
 #finished-button {
@@ -141,16 +152,16 @@ button {
   transition-duration: 0.5s;
 }
 
-#finished-button:hover,
-#Button-For-Input:hover,
-#confirm-received-amount:hover,
 #cancel-modal-received-amount:hover,
-#finish-sale:hover,
 #cancel-modal-change:hover,
 .delete-button:hover {
   background-color: #fe0303;
 }
 
+#finished-button:hover,
+#Button-For-Input:hover,#finish-sale:hover,#confirm-received-amount:hover{
+  background-color: #1f9346;
+}
 td input {
   box-sizing: border-box;
   width: 100%;
