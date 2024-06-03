@@ -6,6 +6,7 @@
     <title>Point of Sale</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <nav>
@@ -41,8 +42,10 @@
                     <input type="number" id="quantity-input" placeholder="Cantidad" required>
                     <input type="number" id="price-input" placeholder="Precio" step="0.01" required>
                     <button type="button" id="Button-For-Input">Agregar</button>
+
+                    
                 </form>
-                
+
                 <div class="total-container">
                     <h3>Total:</h3>
                     <span id="total-display">$0.00</span>
@@ -50,11 +53,36 @@
                 
                 <div class="action-buttons">
                     <button id="finished-button">Terminar</button>
+                    <button  id="bbb"></button>
+
                 </div>
             </div>
         </main>
     </div>
-    <div id="modal_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Id quia, magni unde saepe fugit illum iusto sunt, quas laboriosam optio, maxime iste? A id unde dolores quidem tenetur. Temporibus, ullam!<button id="modal-button">X</button></div>
-    <script src="consultas.js"></script>
+    <div class="modal-content" id="modal-received-amount" hidden >
+        <div class="label-for-modal-display">Ingrese el dinero recibido</div>
+        <input type="number" placeholder="$0.00" class="modal-input" id="received-amount-input">
+        <div id="container-for-buttons-for-modal">
+          <button class="modal-button" id="confirm-received-amount">Aceptar</button>
+          <button class="modal-button" id="cancel-modal-received-amount">Cancelar</button>
+
+        </div>
+      </div>
+      
+      <div class="modal-content" id="modal-change" hidden >
+        <div class="label-for-modal-display">Cambio que se debe dar</div>
+        <input type="number" placeholder="$0.00" readonly id="change-input">
+        <div id="container-for-buttons-for-modal">
+          <button class="modal-button-2" id="finish-sale-with-ticket">Terminar con Ticket</button>
+          <button class="modal-button-2" id="finish-sale-withouth-ticket">Terminar sin Ticket</button>
+          <button class="modal-button-2" id="cancel-modal-change">Cancelar</button>
+
+        </div>
+      </div>
+
+    <script src="consultas.js">
+
+
+    </script>
 </body>
 </html>                           

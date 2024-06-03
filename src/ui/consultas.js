@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
@@ -10,32 +11,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalDisplay = document.getElementById('total-display');
     const printButton = document.getElementById('print-button');
     const finishButton = document.getElementById('finished-button');
+    const modalReceivedAmount = document.getElementById('modal-received-amount');
+    const receivedAmountInput = document.getElementById('received-amount-input');
+    const confirmReceivedAmountButton = document.getElementById('confirm-received-amount');
+    const cancelModalReceivedAmountButton = document.getElementById('cancel-modal-received-amount');
+    const modalChange = document.getElementById('modal-change');
+    const changeInput = document.getElementById('change-input');
+    const finishSaleButton = document.getElementById('finish-sale');
+    const cancelModalChangeButton = document.getElementById('cancel-modal-change');
+
 
     finishButton.addEventListener('click', function() {
-        console.log('Botón Finalizar clickeado');
-
-        const totalAmount = total.toFixed(2);
-        console.log('Total:', totalAmount);
-
-        const receivedAmount = parseFloat(prompt(`El total de la compra es $${totalAmount}. Ingrese la cantidad recibida:`));        console.log('Cantidad recibida:', receivedAmount);
-
-        if (!isNaN(receivedAmount)) {
-            const change = receivedAmount - totalAmount;
-
-            if (change >= 0) {
-                alert(`Cambio a entregar: $${change.toFixed(2)}`);
-            } else {
-                alert(`Falta dinero por pagar: $${Math.abs(change).toFixed(2)}`);
-            }
-
-            tableBody.innerHTML = '';
-            total = 0;
-            totalDisplay.textContent = '$0.00';
-        } else {
-            alert('Cantidad inválida. Por favor, ingrese un número válido.');
-        }
+        console.log('Botón "Terminar" clickeado');
+        modalReceivedAmount.hidden = false;
     });
 
+    cancelModalReceivedAmountButton.addEventListener('click', function() {
+        modalReceivedAmount.hidden = true;
+    });
+cancelModalChangeButton.addEventListener('click', function() {
+    modalChange.hidden = true;
+});
 
     let total = 0;
 
@@ -58,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="td-delete"><button class="delete-button">X</button></td>
             `;
             
-            // Agregar evento de clic solo a las celdas de cantidad y precio
             row.querySelectorAll('td.editable').forEach(cell => {
                 cell.addEventListener('click', function() {
                     const input = document.createElement('input');
@@ -67,12 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     cell.appendChild(input);
                     input.focus();
                     
-                    // Validar que solo se ingresen números
                     input.addEventListener('input', function() {
                         input.value = input.value.replace(/[^0-9.]/g, '');
                     });
                     
-                    // Actualizar valor de la celda al perder el enfoque o presionar Enter
                     input.addEventListener('blur', updateCellValue);
                     input.addEventListener('keypress', function(event) {
                         if (event.key === 'Enter') {
@@ -117,6 +110,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
+
+    confirmReceivedAmountButton.addEventListener('click', function() {
+        const receivedAmount = parseFloat(receivedAmountInput.value);
+        const totalAmount = total.toFixed(2);
+
+        if (!isNaN(receivedAmount)) {
+            const change = receivedAmount - totalAmount;
+
+            if (change >= 0) {
+                changeInput.value = change.toFixed(2);
+                modalReceivedAmount.hidden = true;
+                modalChange.hidden = false;
+            } else {
+                ipcRenderer.send('show-message-box', {
+                    type: 'warning',
+                    title: 'Falta dinero',
+                    message: `Falta dinero por pagar: $${Math.abs(change).toFixed(2)}`,
+                    buttons: ['Aceptar']
+                });
+            }
+        } else {
+            ipcRenderer.send('show-message-box', {
+                type: 'error',
+                title: 'Cantidad inválida',
+                message: 'Por favor, ingrese un número válido.',
+                buttons: ['Aceptar']
+            });
+        }
+    });
+
+    cancelModalReceivedAmountButton.addEventListener('click', function() {
+        receivedAmountInput.value = '';
+        modalReceivedAmount.hidden = true;
+    });
+
+    finishSaleButton.addEventListener('click', function() {
+        // Lógica para imprimir el ticket (si es necesario)
+        // ...
+
+        tableBody.innerHTML = '';
+        total = 0;
+        totalDisplay.textContent = '$0.00';
+        modalChange.hidden = true;
+    });
+
+    cancelModalChangeButton.addEventListener('click', function() {
+        modalChange.hidden = true;
+    });
 
     function updateTotal() {
         total = 0;

@@ -5,6 +5,11 @@ body {
   background-color: #f0f0f0;
 }
 
+#Button-For-Input {
+  transition-property: background-color;
+  transition-duration: 0.5s;
+}
+
 .container {
   display: flex;
   height: 100vh;
@@ -54,6 +59,10 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
+th:nth-child(even) {
+  background-color: #ddd;
+}
+
 th:nth-child(1), td:nth-child(1) {
   width: 20%;
 }
@@ -67,7 +76,7 @@ th:nth-child(3), td:nth-child(3) {
 }
 
 th:nth-child(4), td:nth-child(4) {
-  width: 10%;
+  width: 15%;
 }
 
 th:nth-child(5), td:nth-child(5) {
@@ -112,19 +121,18 @@ button {
   padding: 10px 20px;
   margin-right: 10px;
   height: 300px;
-
 }
 
-.delete-button{
+.delete-button {
   width: 100%;
   height: 100%;
   margin: 0;
   box-sizing: border-box;
   border: none;
   background-color: #beaeae;
-
 }
-#finished-button{
+
+#finished-button {
   width: 100%;
   height: 160px;
   display: inline-block;
@@ -132,10 +140,17 @@ button {
   transition-property: background-color;
   transition-duration: 0.5s;
 }
-#finished-button:hover,.delete-button
-{
+
+#finished-button:hover,
+#Button-For-Input:hover,
+#confirm-received-amount:hover,
+#cancel-modal-received-amount:hover,
+#finish-sale:hover,
+#cancel-modal-change:hover,
+.delete-button:hover {
   background-color: #fe0303;
 }
+
 td input {
   box-sizing: border-box;
   width: 100%;
@@ -147,20 +162,63 @@ td input {
   font-size: inherit;
   font-family: inherit;
 }
-#modal_content{
-  background-color: #fe0303;
+
+.modal-content {
+  background-color: #333;
   width: 40vw;
   height: 30vh;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-bottom: 0;
-margin: auto;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid rgb(0, 0, 0);
+  border-radius: 5px;
 }
-#modal-button{
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 8%;
+
+.modal-button {
+  display: inline-block;
+  width: 50%;
+  transition-property: background-color;
+  transition-duration: 1s;
+  height: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.label-for-modal-display {
+  text-align: center;
+  font-size: 35px;
+  color: #f0f0f0;
+  height: 30%;
+}
+
+#received-amount-input,
+#change-input {
+  text-align: center;
+  font-size: 35px;
+  width: 100%;
+  height: 40%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#container-for-buttons-for-modal {
+  height: 30%;
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+}
+
+.modal-button-2 {
+  display: inline-block;
+  width: 33.333%;
+  transition-property: background-color;
+  transition-duration: 1s;
+  height: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  margin-right: 0;
 }
