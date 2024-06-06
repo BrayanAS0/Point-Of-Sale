@@ -8,6 +8,8 @@ const connection = mysql.createConnection({
   password: 'root',
   database: 'pos'
 });
+global.dbConnection = connection;
+
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -55,7 +57,7 @@ app.on('window-all-closed', () => {
     });
   }
 });
-
+/*
 ipcMain.on('consultar-estudiantes', (event) => {
   console.log('Evento "consultar-estudiantes" recibido en el proceso principal');
   connection.query('SELECT * FROM estudiantes', (error, results) => {
@@ -69,5 +71,5 @@ ipcMain.on('consultar-estudiantes', (event) => {
   });
 });
 
-
+*/
 ///

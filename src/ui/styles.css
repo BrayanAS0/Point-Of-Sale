@@ -115,6 +115,7 @@ form {
 
 input[type="text"],
 input[type="number"],
+input[type="search"] ,
 button {
   padding: 8px;
   margin-bottom: 10px;
@@ -159,8 +160,11 @@ button {
 }
 
 #finished-button:hover,
-#Button-For-Input:hover,#finish-sale:hover,#confirm-received-amount:hover{
+#Button-For-Input:hover,#finish-sale:hover,#confirm-received-amount:hover,#finish-sale-with-ticket:hover{
   background-color: #1f9346;
+}
+#finish-sale-withouth-ticket:hover{
+  background-color: #5f8ff9;
 }
 td input {
   box-sizing: border-box;

@@ -45,8 +45,11 @@
 
             <div class="sidebar">
                 <form id="search-form">
-                    <input type="text" id="code-input" placeholder="Codigo" required>
-                    <input type="text" id="name-input" placeholder="Nombre" required>
+                    <input type="search" id="code-input" placeholder="Código" required>
+                    <div id="code-suggestions"></div>
+                    
+                    <input type="search" id="name-input" placeholder="Nombre" required>
+                    <div id="name-suggestions"></div>
                     <input type="text" id="category-input" placeholder="Categoria" required>
                     <input type="number" id="quantity-input" placeholder="Cantidad" required>
                     <input type="number" id="price-input" placeholder="Precio" step="0.01" required>
@@ -88,7 +91,8 @@
         </div>
     </div>
 
-    <script src="consultas.js"></script>
-</body>
 
+</body>
+<script src="logica.js"></script>
+<script src="../main.js"></script>
 </html>
