@@ -24,59 +24,144 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelModalChangeButton = document.getElementById('cancel-modal-change');
     let total = 0;
 
+    let selectedSuggestionIndex = -1;
+
     function showSuggestions(searchTerm, inputElement) {
         const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
         const suggestionsList = document.getElementById(suggestionsContainer);
-    
+
         // Realizar consulta a la base de datos MySQL
-        const query = `SELECT * FROM productos WHERE ${inputElement === codeInput ? 'codigo_producto' : 'nombre'} LIKE ?`;
+        const query = `SELECT * FROM productos WHERE ${inputElement === codeInput ? 'codigo_producto' : 'nombre'} LIKE ? LIMIT 5`;
         connection.query(query, [`%${searchTerm}%`], (error, results) => {
             if (error) {
                 console.error('Error al obtener sugerencias:', error);
                 return;
             }
-    
+
             // Limpiar sugerencias anteriores
             suggestionsList.innerHTML = '';
-    
+
             // Mostrar nuevas sugerencias
-            results.forEach(result => {
+            results.forEach((result, index) => {
                 const suggestion = document.createElement('div');
-                suggestion.textContent = inputElement === codeInput ? result.codigo : result.nombre;
+                suggestion.textContent = inputElement === codeInput ? result.codigo_producto : result.nombre;
                 suggestion.classList.add('suggestion');
                 suggestion.addEventListener('click', function() {
-                    inputElement.value = inputElement === codeInput ? result.codigo : result.nombre;
-                    suggestionsList.innerHTML = '';
+                    selectSuggestion(result);
+                });
+                suggestion.addEventListener('mouseenter', function() {
+                    suggestion.classList.add('selected');
+                });
+                suggestion.addEventListener('mouseleave', function() {
+                    suggestion.classList.remove('selected');
                 });
                 suggestionsList.appendChild(suggestion);
             });
+
+            selectedSuggestionIndex = -1;
+
+            // Mostrar el contenedor de sugerencias y ajustar su posición
+            suggestionsList.style.display = 'block';
+            const inputRect = inputElement.getBoundingClientRect();
+            suggestionsList.style.top = inputRect.bottom + 'px';
+            suggestionsList.style.left = inputRect.left + 'px';
+            suggestionsList.style.width = inputRect.width + 'px';
         });
     }
-    
-    codeInput.addEventListener('input', function() {
-        showSuggestions(this.value, this);
-    });
-    
-    nameInput.addEventListener('input', function() {
-        showSuggestions(this.value, this);
-    });
-    codeInput.addEventListener('input', function() {
-        showSuggestions(this.value, this);
-    });
 
-    nameInput.addEventListener('input', function() {
-        showSuggestions(this.value, this);
-    });
+    function selectSuggestion(result) {
+        codeInput.value = result.codigo_producto;
+        nameInput.value = result.nombre;
+        categoryInput.value = result.categoria;
+        priceInput.value = result.precio_publico;
+        hideSuggestions();
+    }
 
-    // Ocultar las sugerencias cuando se hace clic fuera de los campos de entrada
-    document.addEventListener('click', function(event) {
-        const suggestionsLists = document.querySelectorAll('.suggestions-list');
-        suggestionsLists.forEach(list => {
-            if (!list.parentNode.contains(event.target)) {
-                list.innerHTML = '';
-            }
+    function hideSuggestions() {
+        const suggestionsList = document.querySelectorAll('.suggestions-container');
+        suggestionsList.hidden=true
+        suggestionsList.forEach(list => {
+            list.style.display = 'none';
         });
+    }
+
+    codeInput.addEventListener('input', function() {
+        showSuggestions(this.value, this);
     });
+
+    codeInput.addEventListener('focus', function() {
+        showSuggestions(this.value, this);
+        const namesuggestionsList = document.getElementById('name-suggestions');
+        namesuggestionsList.style.display = 'none';
+    });
+
+    codeInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            const codesuggestionsList = document.getElementById('code-suggestions');
+            if (!codesuggestionsList.contains(document.activeElement)) {
+                hideSuggestions();
+            }
+        }, 100);
+    });
+
+    nameInput.addEventListener('input', function() {
+        showSuggestions(this.value, this);
+    });
+
+    nameInput.addEventListener('focus', function() {
+        showSuggestions(this.value, this);
+        const codesuggestionsList = document.getElementById('code-suggestions');
+        codesuggestionsList.style.display = 'none';
+    });
+
+    nameInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            const namesuggestionsList = document.getElementById('name-suggestions');
+            if (!namesuggestionsList.contains(document.activeElement)) {
+                hideSuggestions();
+            }
+        }, 100);
+    });
+
+    codeInput.addEventListener('keydown', function(event) {
+        handleKeyboardNavigation(event, this);
+    });
+
+    nameInput.addEventListener('keydown', function(event) {
+        handleKeyboardNavigation(event, this);
+    });
+
+    function handleKeyboardNavigation(event, inputElement) {
+        const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
+        const suggestionsList = document.getElementById(suggestionsContainer);
+        const suggestions = suggestionsList.getElementsByClassName('suggestion');
+
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.length) % suggestions.length;
+            highlightSuggestion();
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.length;
+            highlightSuggestion();
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            if (selectedSuggestionIndex !== -1) {
+                const selectedSuggestion = suggestions[selectedSuggestionIndex];
+                selectedSuggestion.click();
+            }
+        }
+    }
+
+    function highlightSuggestion() {
+        const suggestions = document.getElementsByClassName('suggestion');
+        for (let i = 0; i < suggestions.length; i++) {
+            suggestions[i].classList.remove('selected');
+        }
+        if (selectedSuggestionIndex !== -1) {
+            suggestions[selectedSuggestionIndex].classList.add('selected');
+        }
+    }
 
     confirmReceivedAmountButton.addEventListener('click', function() {
         console.log('Botón "Confirmar" clickeado');

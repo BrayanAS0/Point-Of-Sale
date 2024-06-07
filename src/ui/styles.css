@@ -81,10 +81,13 @@ th:nth-child(2), td:nth-child(2) {
 }
 
 th:nth-child(3), td:nth-child(3) {
+  text-align: center;
   width: 15%;
 }
 
 th:nth-child(4), td:nth-child(4) {
+  text-align: center;
+
   width: 15%;
 }
 
@@ -236,4 +239,23 @@ td input {
   box-sizing: border-box;
   margin-left: 0;
   margin-right: 0;
+}
+.suggestions-container {
+  position: absolute;
+  z-index: 1000;
+  background-color: rgb(237, 19, 19);
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.suggestion {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.suggestion:hover,
+.suggestion.selected {
+  background-color: #a81a1a;
 }
