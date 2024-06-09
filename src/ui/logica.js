@@ -4,13 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
-    const categoryInput = document.getElementById('category-input');
-    const quantityInput = document.getElementById('quantity-input');
-    const priceInput = document.getElementById('price-input');
-    const addButton = document.getElementById('Button-For-Input');
     const tableBody = document.getElementById('table-body');
     const totalDisplay = document.getElementById('total-display');
-    const printButton = document.getElementById('print-button');
     const finishButton = document.getElementById('finished-button');
     const modalReceivedAmount = document.getElementById('modal-received-amount');
     const receivedAmountInput = document.getElementById('received-amount-input');
@@ -30,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
         const suggestionsList = document.getElementById(suggestionsContainer);
 
-        // Realizar consulta a la base de datos MySQL
+        //MySQL
         const query = `SELECT * FROM productos WHERE ${inputElement === codeInput ? 'codigo_producto' : 'nombre'} LIKE ? LIMIT 5`;
         connection.query(query, [`%${searchTerm}%`], (error, results) => {
             if (error) {
@@ -38,10 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Limpiar sugerencias anteriores
+            // Limpiar sugerencias anteriores 
             suggestionsList.innerHTML = '';
 
-            // Mostrar nuevas sugerencias
+            // Mostrar nuevas sugerencias ,suggestion para y dar el click
             results.forEach((result, index) => {
                 const suggestion = document.createElement('div');
                 suggestion.textContent = inputElement === codeInput ? result.codigo_producto : result.nombre;
@@ -70,16 +65,74 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function selectSuggestion(result) {
-        codeInput.value = result.codigo_producto;
-        nameInput.value = result.nombre;
-        categoryInput.value = result.categoria;
-        priceInput.value = result.precio_publico;
+        const code = result.codigo_producto;
+        const name = result.nombre;
+        const category = result.categoria;
+        const price = parseFloat(result.precio_publico);
+        const quantity = 1;
+
+        // Buscar si ya existe una fila con el mismo código de producto
+        const existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === code);
+
+        if (existingRow) {
+            // Si ya existe una fila con el mismo código, incrementar la cantidad
+            const quantityCell = existingRow.cells[3];
+            const currentQuantity = parseInt(quantityCell.textContent);
+            quantityCell.textContent = currentQuantity + 1;
+        } else {
+            // Si no existe una fila con el mismo código, crear una nueva fila
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${code}</td>
+                <td>${name}</td>
+                <td>${category}</td>
+                <td class="editable">${quantity}</td>
+                <td class="editable">$${price.toFixed(2)}</td>
+                <td>$${(quantity * price).toFixed(2)}</td>
+                <td class="td-delete"><button class="delete-button">X</button></td>
+            `;
+
+            row.querySelectorAll('td.editable').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    const input = document.createElement('input');
+                    input.value = cell.textContent.replace('$', '');
+                    cell.textContent = '';
+                    cell.appendChild(input);
+                    input.focus();
+
+                    input.addEventListener('input', function() {
+                        input.value = input.value.replace(/[^0-9.]/g, '');
+                    });
+
+                    input.addEventListener('blur', updateCellValue);
+                    input.addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            updateCellValue();
+                        }
+                    });
+
+                    function updateCellValue() {
+                        const newValue = input.value.trim();
+                        cell.textContent = cell.classList.contains('price') ? `$${newValue}` : newValue;
+                        updateTotal();
+                    }
+                });
+            });
+
+            tableBody.appendChild(row);
+        }
+
+        updateTotal();
+
+        // Limpiar los campos de entrada después de agregar la fila
+        codeInput.value = '';
+        nameInput.value = '';
+
         hideSuggestions();
     }
 
     function hideSuggestions() {
         const suggestionsList = document.querySelectorAll('.suggestions-container');
-        suggestionsList.hidden=true
         suggestionsList.forEach(list => {
             list.style.display = 'none';
         });
@@ -148,7 +201,13 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             if (selectedSuggestionIndex !== -1) {
                 const selectedSuggestion = suggestions[selectedSuggestionIndex];
-                selectedSuggestion.click();
+                const result = {
+                    codigo_producto: selectedSuggestion.dataset.codigo,
+                    nombre: selectedSuggestion.dataset.nombre,
+                    categoria: selectedSuggestion.dataset.categoria,
+                    precio_publico: selectedSuggestion.dataset.precio
+                };
+                selectSuggestion(result);
             }
         }
     }
@@ -201,64 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         modalChange.hidden = true;
     });
 
-    addButton.addEventListener('click', function() {
-        const code = codeInput.value.trim();
-        const name = nameInput.value.trim();
-        const category = categoryInput.value.trim();
-        const quantity = parseInt(quantityInput.value);
-        const price = parseFloat(priceInput.value);
-
-        if (code && name && category && quantity && price) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${code}</td>
-                <td>${name}</td>
-                <td>${category}</td>
-                <td class="editable">${quantity}</td>
-                <td class="editable">$${price.toFixed(2)}</td>
-                <td>$${(quantity * price).toFixed(2)}</td>
-                <td class="td-delete"><button class="delete-button">X</button></td>
-            `;
-
-            row.querySelectorAll('td.editable').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    const input = document.createElement('input');
-                    input.value = cell.textContent.replace('$', '');
-                    cell.textContent = '';
-                    cell.appendChild(input);
-                    input.focus();
-
-                    input.addEventListener('input', function() {
-                        input.value = input.value.replace(/[^0-9.]/g, '');
-                    });
-
-                    input.addEventListener('blur', updateCellValue);
-                    input.addEventListener('keypress', function(event) {
-                        if (event.key === 'Enter') {
-                            updateCellValue();
-                        }
-                    });
-
-                    function updateCellValue() {
-                        const newValue = input.value.trim();
-                        cell.textContent = cell.classList.contains('price') ? `$${newValue}` : newValue;
-                        updateTotal();
-                    }
-                });
-            });
-
-            tableBody.appendChild(row);
-
-            updateTotal();
-
-            codeInput.value = '';
-            nameInput.value = '';
-            categoryInput.value = '';
-            quantityInput.value = '';
-            priceInput.value = '';
-        }
-    });
-
     tableBody.addEventListener('click', function(e) {
         if (e.target.classList.contains('delete-button')) {
             const row = e.target.parentElement.parentElement;
@@ -271,13 +272,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    printButton.addEventListener('click', function() {
-        window.print();
-    });
-
     finishSaleButton.addEventListener('click', function() {
         // Lógica para imprimir el ticket (si es necesario)
-        // ...
+        // utlimas cosas por hacer , recurda pedir rollo o checar con impresora dimensionarlo 
+        
 
         tableBody.innerHTML = '';
         total = 0;
@@ -301,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         totalDisplay.textContent = `$${total.toFixed(2)}`;
     }
 
-    // Cerrar la conexión cuando la aplicación se cierre
+    // Cerrar la conexión cuando la aplicación se cierre, verificar si se apaga la compu se guarden los datos
     window.addEventListener('beforeunload', function() {
         connection.end((err) => {
             if (err) {
