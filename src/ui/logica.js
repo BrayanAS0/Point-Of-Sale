@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
         const suggestionsList = document.getElementById(suggestionsContainer);
 
-        //MySQL
+        // Realizar consulta a la base de datos MySQL
         const query = `SELECT * FROM productos WHERE ${inputElement === codeInput ? 'codigo_producto' : 'nombre'} LIKE ? LIMIT 5`;
         connection.query(query, [`%${searchTerm}%`], (error, results) => {
             if (error) {
@@ -33,22 +33,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Limpiar sugerencias anteriores 
+            // Limpiar sugerencias anteriores
             suggestionsList.innerHTML = '';
 
-            // Mostrar nuevas sugerencias ,suggestion para y dar el click
+            // Mostrar nuevas sugerencias, suggestion para y dar el click
             results.forEach((result, index) => {
                 const suggestion = document.createElement('div');
                 suggestion.textContent = inputElement === codeInput ? result.codigo_producto : result.nombre;
                 suggestion.classList.add('suggestion');
+                suggestion.dataset.codigo = result.codigo_producto;
+                suggestion.dataset.nombre = result.nombre;
+                suggestion.dataset.categoria = result.categoria;
+                suggestion.dataset.precio = result.precio_publico;
                 suggestion.addEventListener('click', function() {
                     selectSuggestion(result);
                 });
                 suggestion.addEventListener('mouseenter', function() {
-                    suggestion.classList.add('selected');
-                });
-                suggestion.addEventListener('mouseleave', function() {
-                    suggestion.classList.remove('selected');
+                    selectedSuggestionIndex = Array.from(suggestionsList.children).indexOf(this);
+                    highlightSuggestion();
                 });
                 suggestionsList.appendChild(suggestion);
             });
@@ -222,6 +224,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const scannedCode = event.target.value;
+            if (scannedCode) {
+                // Realizar consulta a la base de datos MySQL para obtener el producto escaneado
+                const query = 'SELECT * FROM productos WHERE codigo_producto = ?';
+                connection.query(query, [scannedCode], (error, results) => {
+                    if (error) {
+                        console.error('Error al obtener el producto escaneado:', error);
+                        return;
+                    }
+
+                    if (results.length > 0) {
+                        const result = results[0];
+                        selectSuggestion(result);
+                        event.target.value = ''; // Limpiar el valor del campo de entrada después de escanear
+                    }
+                });
+            }
+        }
+    });
+
     confirmReceivedAmountButton.addEventListener('click', function() {
         console.log('Botón "Confirmar" clickeado');
         const receivedAmount = parseFloat(receivedAmountInput.value);
@@ -274,8 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     finishSaleButton.addEventListener('click', function() {
         // Lógica para imprimir el ticket (si es necesario)
-        // utlimas cosas por hacer , recurda pedir rollo o checar con impresora dimensionarlo 
-        
+        // Últimas cosas por hacer, recuerda pedir rollo o checar con impresora dimensionarlo
 
         tableBody.innerHTML = '';
         total = 0;

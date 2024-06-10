@@ -129,11 +129,14 @@ button {
   padding: 10px;
   margin-bottom: 20px;
 }
+#total-display{
+  font-size: 30px;
+}
 
 .action-buttons button {
   padding: 10px 20px;
   margin-right: 10px;
-  height: 300px;
+  min-height: 250px;
 }
 
 .delete-button {
