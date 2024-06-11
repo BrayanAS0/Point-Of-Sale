@@ -92,36 +92,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>$${(quantity * price).toFixed(2)}</td>
                 <td class="td-delete"><button class="delete-button">X</button></td>
             `;
-
+    
             row.querySelectorAll('td.editable').forEach(cell => {
                 cell.addEventListener('click', function() {
+                    blurCodeInput(); // Desenfocar el code-input al hacer clic en una celda editable
+    
                     const input = document.createElement('input');
                     input.value = cell.textContent.replace('$', '');
                     cell.textContent = '';
                     cell.appendChild(input);
                     input.focus();
-
+    
                     input.addEventListener('input', function() {
                         input.value = input.value.replace(/[^0-9.]/g, '');
                     });
-
-                    input.addEventListener('blur', updateCellValue);
+    
+                    input.addEventListener('blur', function() {
+                        updateCellValue();
+                        focusCodeInput(); // Enfocar el code-input al perder el foco del input creado dinámicamente
+                    });
+    
                     input.addEventListener('keypress', function(event) {
                         if (event.key === 'Enter') {
                             updateCellValue();
+                            focusCodeInput(); // Enfocar el code-input al presionar Enter en el input creado dinámicamente
                         }
                     });
-
+    
                     function updateCellValue() {
                         const newValue = input.value.trim();
                         cell.textContent = cell.classList.contains('price') ? `$${newValue}` : newValue;
                         updateTotal();
                         focusCodeInput();
                     }
-                
                 });
             });
-
+    
             tableBody.appendChild(row);
         }
 
@@ -303,12 +309,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-
     document.addEventListener('click', function(event) {
         if (
             !nameInput.contains(event.target) &&
             !modalReceivedAmount.contains(event.target) &&
-            !modalChange.contains(event.target)
+            !modalChange.contains(event.target) &&
+            !event.target.classList.contains('editable')
         ) {
             focusCodeInput();
         }
