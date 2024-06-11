@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelModalReceivedAmountButton = document.getElementById('cancel-modal-received-amount');
     const modalChange = document.getElementById('modal-change');
     const changeInput = document.getElementById('change-input');
-    const finishSaleButton = document.getElementById('finish-sale');
     const finishSaleWithTicketButton = document.getElementById('finish-sale-with-ticket');
     const finishSaleWithouthTicketButton = document.getElementById('finish-sale-withouth-ticket');
     const cancelModalChangeButton = document.getElementById('cancel-modal-change');
@@ -117,7 +116,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         const newValue = input.value.trim();
                         cell.textContent = cell.classList.contains('price') ? `$${newValue}` : newValue;
                         updateTotal();
+                        focusCodeInput();
                     }
+                
                 });
             });
 
@@ -266,6 +267,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function focusCodeInput() {
+        codeInput.focus();
+    }
+
+    function blurCodeInput() {
+        codeInput.blur();
+    }
+
     function highlightSuggestion() {
         const suggestions = document.getElementsByClassName('suggestion');
         for (let i = 0; i < suggestions.length; i++) {
@@ -295,6 +304,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    document.addEventListener('click', function(event) {
+        if (
+            !nameInput.contains(event.target) &&
+            !modalReceivedAmount.contains(event.target) &&
+            !modalChange.contains(event.target)
+        ) {
+            focusCodeInput();
+        }
+    });
+
+    nameInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            focusCodeInput();
+        }
+    });
+
     confirmReceivedAmountButton.addEventListener('click', function() {
         console.log('Botón "Confirmar" clickeado');
         const receivedAmount = parseFloat(receivedAmountInput.value);
@@ -318,19 +343,36 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelModalReceivedAmountButton.addEventListener('click', function() {
         receivedAmountInput.value = '';
         modalReceivedAmount.hidden = true;
+        focusCodeInput();
     });
 
     finishButton.addEventListener('click', function() {
         console.log('Botón "Terminar" clickeado');
         modalReceivedAmount.hidden = false;
+        blurCodeInput();
     });
 
-    cancelModalReceivedAmountButton.addEventListener('click', function() {
-        modalReceivedAmount.hidden = true;
+    // Después de hacer clic en los botones "Terminar con Ticket", "Terminar sin Ticket" y "Cancelar"
+    finishSaleWithTicketButton.addEventListener('click', function() {
+        // Lógica para imprimir el ticket (si es necesario)
+        tableBody.innerHTML = '';
+        total = 0;
+        totalDisplay.textContent = '$0.00';
+        modalChange.hidden = true;
+        focusCodeInput();
+    });
+
+    finishSaleWithouthTicketButton.addEventListener('click', function() {
+        tableBody.innerHTML = '';
+        total = 0;
+        totalDisplay.textContent = '$0.00';
+        modalChange.hidden = true;
+        focusCodeInput();
     });
 
     cancelModalChangeButton.addEventListener('click', function() {
         modalChange.hidden = true;
+        focusCodeInput();
     });
 
     tableBody.addEventListener('click', function(e) {
@@ -343,20 +385,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             row.remove();
         }
-    });
-
-    finishSaleButton.addEventListener('click', function() {
-        // Lógica para imprimir el ticket (si es necesario)
-        // Últimas cosas por hacer, recuerda pedir rollo o checar con impresora dimensionarlo
-
-        tableBody.innerHTML = '';
-        total = 0;
-        totalDisplay.textContent = '$0.00';
-        modalChange.hidden = true;
-    });
-
-    cancelModalChangeButton.addEventListener('click', function() {
-        modalChange.hidden = true;
     });
 
     function updateTotal() {
@@ -379,4 +407,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    nameInput.addEventListener('click', function() {
+        blurCodeInput();
+    });
+    // Enfocar el code-input al cargar la página
+    focusCodeInput();
 });
