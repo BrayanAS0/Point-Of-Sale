@@ -179,11 +179,75 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     codeInput.addEventListener('keydown', function(event) {
-        handleKeyboardNavigation(event, this);
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const selectedSuggestion = document.querySelector('#code-suggestions .suggestion.selected');
+            if (selectedSuggestion) {
+                const result = {
+                    codigo_producto: selectedSuggestion.dataset.codigo,
+                    nombre: selectedSuggestion.dataset.nombre,
+                    categoria: selectedSuggestion.dataset.categoria,
+                    precio_publico: selectedSuggestion.dataset.precio
+                };
+                selectSuggestion(result);
+            } else {
+                const code = this.value.trim();
+                if (code) {
+                    // Realizar consulta a la base de datos MySQL para obtener el producto
+                    const query = 'SELECT * FROM productos WHERE codigo_producto = ?';
+                    connection.query(query, [code], (error, results) => {
+                        if (error) {
+                            console.error('Error al obtener el producto:', error);
+                            return;
+                        }
+
+                        if (results.length > 0) {
+                            const result = results[0];
+                            selectSuggestion(result);
+                            this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
+                        }
+                    });
+                }
+            }
+        } else {
+            handleKeyboardNavigation(event, this);
+        }
     });
 
     nameInput.addEventListener('keydown', function(event) {
-        handleKeyboardNavigation(event, this);
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const selectedSuggestion = document.querySelector('#name-suggestions .suggestion.selected');
+            if (selectedSuggestion) {
+                const result = {
+                    codigo_producto: selectedSuggestion.dataset.codigo,
+                    nombre: selectedSuggestion.dataset.nombre,
+                    categoria: selectedSuggestion.dataset.categoria,
+                    precio_publico: selectedSuggestion.dataset.precio
+                };
+                selectSuggestion(result);
+            } else {
+                const name = this.value.trim();
+                if (name) {
+                    // Realizar consulta a la base de datos MySQL para obtener el producto
+                    const query = 'SELECT * FROM productos WHERE nombre = ?';
+                    connection.query(query, [name], (error, results) => {
+                        if (error) {
+                            console.error('Error al obtener el producto:', error);
+                            return;
+                        }
+
+                        if (results.length > 0) {
+                            const result = results[0];
+                            selectSuggestion(result);
+                            this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
+                        }
+                    });
+                }
+            }
+        } else {
+            handleKeyboardNavigation(event, this);
+        }
     });
 
     function handleKeyboardNavigation(event, inputElement) {
@@ -199,18 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.length;
             highlightSuggestion();
-        } else if (event.key === 'Enter') {
-            event.preventDefault();
-            if (selectedSuggestionIndex !== -1) {
-                const selectedSuggestion = suggestions[selectedSuggestionIndex];
-                const result = {
-                    codigo_producto: selectedSuggestion.dataset.codigo,
-                    nombre: selectedSuggestion.dataset.nombre,
-                    categoria: selectedSuggestion.dataset.categoria,
-                    precio_publico: selectedSuggestion.dataset.precio
-                };
-                selectSuggestion(result);
-            }
         }
     }
 
@@ -225,24 +277,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            const scannedCode = event.target.value;
-            if (scannedCode) {
-                // Realizar consulta a la base de datos MySQL para obtener el producto escaneado
-                const query = 'SELECT * FROM productos WHERE codigo_producto = ?';
-                connection.query(query, [scannedCode], (error, results) => {
-                    if (error) {
-                        console.error('Error al obtener el producto escaneado:', error);
-                        return;
-                    }
+        const scannedCode = event.key;
+        if (scannedCode && /^\d+$/.test(scannedCode)) {
+            // Realizar consulta a la base de datos MySQL para obtener el producto escaneado
+            const query = 'SELECT * FROM productos WHERE codigo_producto = ?';
+            connection.query(query, [scannedCode], (error, results) => {
+                if (error) {
+                    console.error('Error al obtener el producto escaneado:', error);
+                    return;
+                }
 
-                    if (results.length > 0) {
-                        const result = results[0];
-                        selectSuggestion(result);
-                        event.target.value = ''; // Limpiar el valor del campo de entrada después de escanear
-                    }
-                });
-            }
+                if (results.length > 0) {
+                    const result = results[0];
+                    selectSuggestion(result);
+                }
+            });
         }
     });
 
