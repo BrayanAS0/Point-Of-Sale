@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const connection = global.dbConnection;
-
     const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
@@ -19,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let total = 0;
 
     let selectedSuggestionIndex = -1;
+    let selectedCodeSuggestionIndex = -1;
+    let selectedNameSuggestionIndex = -1;
 
     function showSuggestions(searchTerm, inputElement) {
         const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
@@ -48,8 +49,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectSuggestion(result);
                 });
                 suggestion.addEventListener('mouseenter', function() {
-                    selectedSuggestionIndex = Array.from(suggestionsList.children).indexOf(this);
-                    highlightSuggestion();
+                    if (inputElement === codeInput) {
+                        selectedCodeSuggestionIndex = Array.from(suggestionsList.children).indexOf(this);
+                    } else {
+                        selectedNameSuggestionIndex = Array.from(suggestionsList.children).indexOf(this);
+                    }
+                    highlightSuggestion(inputElement);
                 });
                 suggestionsList.appendChild(suggestion);
             });
@@ -143,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideSuggestions() {
         const suggestionsList = document.querySelectorAll('.suggestions-container');
         suggestionsList.forEach(list => {
-            list.style.display = 'none';
+            //list.style.display = 'none';
         });
     }
 
@@ -154,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
     codeInput.addEventListener('focus', function() {
         showSuggestions(this.value, this);
         const namesuggestionsList = document.getElementById('name-suggestions');
-        namesuggestionsList.style.display = 'none';
+      //  namesuggestionsList.style.display = 'none';
     });
 
     codeInput.addEventListener('blur', function() {
@@ -173,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     nameInput.addEventListener('focus', function() {
         showSuggestions(this.value, this);
         const codesuggestionsList = document.getElementById('code-suggestions');
-        codesuggestionsList.style.display = 'none';
+     //   codesuggestionsList.style.display = 'none';
     });
 
     nameInput.addEventListener('blur', function() {
@@ -257,22 +262,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function handleKeyboardNavigation(event, inputElement) {
-        const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
-        const suggestionsList = document.getElementById(suggestionsContainer);
-        const suggestions = suggestionsList.getElementsByClassName('suggestion');
+function handleKeyboardNavigation(event, inputElement) {
+    const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
+    const suggestionsList = document.getElementById(suggestionsContainer);
+    const suggestions = suggestionsList.getElementsByClassName('suggestion');
 
-        if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.length) % suggestions.length;
-            highlightSuggestion();
-        } else if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.length;
-            highlightSuggestion();
-        }
+    let selectedSuggestionIndex = inputElement === codeInput ? selectedCodeSuggestionIndex : selectedNameSuggestionIndex;
+
+    if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.length) % suggestions.length;
+    } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.length;
     }
 
+    if (inputElement === codeInput) {
+        selectedCodeSuggestionIndex = selectedSuggestionIndex;
+    } else {
+        selectedNameSuggestionIndex = selectedSuggestionIndex;
+    }
+
+    highlightSuggestion(inputElement);
+}
     function focusCodeInput() {
         codeInput.focus();
     }
@@ -281,8 +293,11 @@ document.addEventListener('DOMContentLoaded', function() {
         codeInput.blur();
     }
 
-    function highlightSuggestion() {
-        const suggestions = document.getElementsByClassName('suggestion');
+    function highlightSuggestion(inputElement) {
+        const suggestionsContainer = inputElement === codeInput ? 'code-suggestions' : 'name-suggestions';
+        const suggestions = document.getElementById(suggestionsContainer).getElementsByClassName('suggestion');
+        const selectedSuggestionIndex = inputElement === codeInput ? selectedCodeSuggestionIndex : selectedNameSuggestionIndex;
+    
         for (let i = 0; i < suggestions.length; i++) {
             suggestions[i].classList.remove('selected');
         }

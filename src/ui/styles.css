@@ -136,7 +136,7 @@ button {
 .action-buttons button {
   padding: 10px 20px;
   margin-right: 10px;
-  min-height: 250px;
+  min-height: 200px;
 }
 
 .delete-button {
@@ -152,7 +152,7 @@ button {
 
 #finished-button {
   width: 100%;
-  height: 160px;
+  max-height: 80px;
   display: inline-block;
   background-color: #ddd;
   transition-property: background-color;
