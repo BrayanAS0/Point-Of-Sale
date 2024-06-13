@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const connection = global.dbConnection;
+    const { remote } = require('electron');
+
     const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
@@ -373,9 +375,27 @@ function handleKeyboardNavigation(event, inputElement) {
         blurCodeInput();
     });
 
-    // Después de hacer clic en los botones "Terminar con Ticket", "Terminar sin Ticket" y "Cancelar"
+    function generateTicket() {
+        const ticketContent = Array.from(tableBody.querySelectorAll('tr'))
+          .map(row => {
+            const productName = row.cells[1].textContent;
+            const quantity = row.cells[3].textContent;
+            const price = row.cells[4].textContent;
+            return `
+              <tr>
+                <td>${productName}</td>
+                <td>${quantity}</td>
+                <td>${price}</td>
+              </tr>
+            `;
+          })
+          .join('');
+      
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.send('print-ticket', ticketContent);
+      }
     finishSaleWithTicketButton.addEventListener('click', function() {
-        // Lógica para imprimir el ticket (si es necesario)
+        generateTicket();
         tableBody.innerHTML = '';
         total = 0;
         totalDisplay.textContent = '$0.00';
