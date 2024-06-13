@@ -379,20 +379,27 @@ function handleKeyboardNavigation(event, inputElement) {
         const ticketContent = Array.from(tableBody.querySelectorAll('tr'))
           .map(row => {
             const productName = row.cells[1].textContent;
-            const quantity = row.cells[3].textContent;
-            const price = row.cells[4].textContent;
+            const quantity = parseInt(row.cells[3].textContent);
+            const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+            const subtotal = quantity * price;
             return `
               <tr>
-                <td>${productName}</td>
                 <td>${quantity}</td>
-                <td>${price}</td>
+                <td>${productName}</td>
+                <td>$${price.toFixed(2)}</td>
+                <td>$${subtotal.toFixed(2)}</td>
               </tr>
             `;
           })
           .join('');
       
+        const totalAmount = total; // Obtener el total calculado
+      
+        const currentDate = new Date().toLocaleDateString();
+        const currentTime = new Date().toLocaleTimeString();
+      
         const { ipcRenderer } = require('electron');
-        ipcRenderer.send('print-ticket', ticketContent);
+        ipcRenderer.send('print-ticket', { ticketContent, totalAmount, currentDate, currentTime });
       }
     finishSaleWithTicketButton.addEventListener('click', function() {
         generateTicket();

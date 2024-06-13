@@ -10,9 +10,9 @@ const connection = mysql.createConnection({
 });
 global.dbConnection = connection;
 
-function createPrintWindow(ticketContent) {
+function createPrintWindow(ticketContent, totalAmount, currentDate, currentTime) {
   const printWindow = new BrowserWindow({
-    width: 400,
+    width: 300, // Ancho ajustado para un ticket de 80mm
     height: 600,
     show: false,
     webPreferences: {
@@ -22,63 +22,84 @@ function createPrintWindow(ticketContent) {
   });
 
   printWindow.loadURL(`data:text/html,${encodeURIComponent(`
-    <html>
-      <head>
-        <style>
-          body {
-            font-family: monospace;
-            font-size: 12px;
-            margin: 0;
-            padding: 20px;
-          }
-          .ticket-content {
-            text-align: center;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          th, td {
-            padding: 5px;
-            text-align: left;
-          }
-          .total {
-            margin-top: 20px;
-            text-align: right;
-          }
-          .footer {
-            margin-top: 20px;
-            text-align: center;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket-content">
-          <h3>Nombre de la Tienda</h3>
-          <p>Dirección</p>
-          <p>Teléfono</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${ticketContent}
-            </tbody>
-          </table>
-          <div class="total">
-            <p>Total: $45.95</p>
-          </div>
-          <div class="footer">
-            <p>¡Gracias por su compra!</p>
-          </div>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+      <style>
+        body {
+          font-family: monospace;
+          font-size: 10px;
+          margin: 0;
+          padding: 10px;
+          min-width: 70mm;
+          max-width: 70mm;
+
+          box-sizing: border-box;
+        }
+        .ticket-content {
+          text-align: center;
+        }
+        table {
+          width: 100%;
+
+
+          margin-top: 10px;
+        }
+        th, td {
+          padding: 5px;
+          text-align: center;
+          font-size: 11px;
+        }
+        th{
+          border-bottom: 1px solid #000000;
+          border-top: 1px solid #000000;
+        }
+        .total {
+          margin-top: 10px;
+          text-align: right;
+        }
+        .footer {
+          margin-top: 10px;
+          text-align: center;
+        }
+        .date-time {
+          margin-top: 10px;
+          text-align: center;
+          font-size: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="ticket-content">
+        <h3>Ferretera</h3>
+        <p>Dirección</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Cantidad</th>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            ${ticketContent}
+          </tbody>
+        </table>
+        <div class="total">
+          <p style="font-weight: bold;">Total: $${totalAmount.toFixed(2)}</p>
         </div>
-      </body>
-    </html>
+        <div class="footer">
+          <p>¡Gracias por su compra!</p>
+        </div>
+        <div class="date-time">
+          <p style="font-weight: bold;">${currentDate} ${currentTime}</p>
+        </div>
+      </div>
+    </body>
+  </html>
   `)}`);
 
   printWindow.webContents.on('did-finish-load', () => {
@@ -91,8 +112,8 @@ function createPrintWindow(ticketContent) {
   });
 }
 
-ipcMain.on('print-ticket', (event, ticketContent) => {
-  createPrintWindow(ticketContent);
+ipcMain.on('print-ticket', (event, { ticketContent, totalAmount, currentDate, currentTime }) => {
+  createPrintWindow(ticketContent, totalAmount, currentDate, currentTime);
 });
 
 const createWindow = () => {
