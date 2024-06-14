@@ -1,0 +1,30 @@
+body{
+    margin: 0;
+    font-family: Arial, sans-serif;
+
+}
+nav {
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    min-height: 100vh;
+  }
+  
+  nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+  
+  nav li {
+    padding: 10px;
+  }
+  
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    width: 100%;
+    display: inline-block;
+  font-size: 25px;
+  }

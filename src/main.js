@@ -128,7 +128,7 @@ const createWindow = () => {
   });
 
   console.log('Cargando archivo HTML...');
-  win.loadFile('src//ui//index.html');
+  win.loadFile('src//ui//html/index.html');
 };
 
 app.whenReady().then(() => {
