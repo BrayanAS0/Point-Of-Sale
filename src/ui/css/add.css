@@ -48,13 +48,23 @@ nav {
   }
 input,
 button {
+  display: inline-block;
+
   padding: 8px;
   margin-bottom: 10px;
   min-width: 100%;
   box-sizing: border-box;
-  min-height: 10%;
-}
+  min-height: 30%;
+  }
 #search-form{
-  min-height: 100vh;
+  min-height: 90vh;
   min-width: 20vw;
+  margin-top:5vh ;
+}
+#tag{
+margin-left: 5vh;
+  min-height: 90vh;
+  max-width: 40vw;
+  margin-top:5vh ;
+  font-size: 26px;
 }

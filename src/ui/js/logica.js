@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (existingRow) {
             // Si ya existe una fila con el mismo código, incrementar la cantidad
             const quantityCell = existingRow.cells[3];
-            const currentQuantity = parseInt(quantityCell.textContent);
-            quantityCell.textContent = currentQuantity + 1;
+            const currentQuantity = parseFloat(quantityCell.textContent);
+            quantityCell.textContent = (currentQuantity + quantity).toFixed(2);
         } else {
             // Si no existe una fila con el mismo código, crear una nueva fila
             const row = document.createElement('tr');
@@ -438,7 +438,7 @@ function handleKeyboardNavigation(event, inputElement) {
     function updateTotal() {
         total = 0;
         tableBody.querySelectorAll('tr').forEach(row => {
-            const quantity = parseInt(row.cells[3].textContent);
+            const quantity = parseFloat(row.cells[3].textContent);
             const price = parseFloat(row.cells[4].textContent.replace('$', ''));
             const subtotal = quantity * price;
             row.cells[5].textContent = `$${subtotal.toFixed(2)}`;

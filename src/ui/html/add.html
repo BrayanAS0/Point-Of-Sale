@@ -41,20 +41,38 @@
 
         <div class="sidebar">
             <form id="search-form">
-                <input type="number" id="code-input" placeholder="Código" required>                
+                <input type="text" id="code-input" placeholder="Código" required>                
                 <input type="text" id="name-input" placeholder="Nombre" required>
-                <input type="text" id="name-input" placeholder="Categoria" required>
-                <input type="search" id="name-input" placeholder="Inventario" required>
-                <input type="search" id="name-input" placeholder="Cantidad minima" required>
-                <input type="search" id="name-input" placeholder="Precio Publico" required>
-                <input type="search" id="name-input" placeholder="Precio Provedor" required>
+                <input type="text" id="name-input" placeholder="Categoria" >
+                <input type="number" id="name-input" placeholder="Inventario" required>
+                <input type="number" id="name-input" placeholder="Cantidad minima" required>
+                <input type="number" id="name-input" placeholder="Precio Publico" required>
+                <input type="number" id="name-input" placeholder="Precio Provedor" required>
                 <button>Guardar</button>
             </form>
 
 
-
         </div>
+        <div id="tag">
+            <b>Codigo:</b>es el codigo del prodcuto y tiene que ser unico y no repetitivo
+            <br>
+            <br>
+            <b>Nombre:</b> es el nombre del producto
+            <br>
+            <br>
+            <b>Categoria:</b> es la categoria del producto
+            <br>
+            <br>
+            <b>Inventario:</b> es el inventario del producto
+            <br>
+            <br>
+            <b>Minimo:</b> es el minimo del inventario
+            <br>
+            <br>
+            <b>Publico:</b> es el precio publico del producto
+        </div>
+
 </body>
-<script src="../js/logica.js"></script>
+<script src="../js/add.js"></script>
 <script src="../../main.js"></script>
 </html>
