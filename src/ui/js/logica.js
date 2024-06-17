@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 suggestion.dataset.categoria = result.categoria;
                 suggestion.dataset.precio = result.precio_publico;
                 suggestion.addEventListener('click', function() {
-                    selectSuggestion(result);
+                   selectSuggestion(result);
+                   console.log(result +" + result 1" );
                 });
                 suggestion.addEventListener('mouseenter', function() {
                     if (inputElement === codeInput) {
@@ -204,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     precio_publico: selectedSuggestion.dataset.precio
                 };
                 selectSuggestion(result);
+                console.log(result+" + result 2");
             } else {
                 const code = this.value.trim();
                 if (code) {
@@ -218,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (results.length > 0) {
                             const result = results[0];
                             selectSuggestion(result);
+                            console.log(result+" + result 3");
                             this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
                         }
                     });
@@ -240,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     precio_publico: selectedSuggestion.dataset.precio
                 };
                 selectSuggestion(result);
+                console.log(result+" + result 4");
             } else {
                 const name = this.value.trim();
                 if (name) {
@@ -254,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (results.length > 0) {
                             const result = results[0];
                             selectSuggestion(result);
+                            console.log(result+" + result 5");
                             this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
                         }
                     });
@@ -319,10 +324,11 @@ function handleKeyboardNavigation(event, inputElement) {
                     return;
                 }
 
-                if (results.length > 0) {
+                /*if (results.length > 0) {
                     const result = results[0];
                     selectSuggestion(result);
-                }
+                    console.log(result+" + result 6");
+                }*/
             });
         }
     });
@@ -366,7 +372,8 @@ function handleKeyboardNavigation(event, inputElement) {
     cancelModalReceivedAmountButton.addEventListener('click', function() {
         receivedAmountInput.value = '';
         modalReceivedAmount.hidden = true;
-        focusCodeInput();
+                    blurCodeInput(); // Desenfocar el code-input al hacer clic en una celda editable
+
     });
 
     finishButton.addEventListener('click', function() {
