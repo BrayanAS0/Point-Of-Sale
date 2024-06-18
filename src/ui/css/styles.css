@@ -66,6 +66,8 @@ th, td {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 20px;
+  word-wrap: break-word;
+
 }
 
 tr:nth-child(even) {
