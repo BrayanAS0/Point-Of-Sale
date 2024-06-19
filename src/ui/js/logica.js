@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 suggestion.dataset.precio = result.precio_publico;
                 suggestion.addEventListener('click', function() {
                    selectSuggestion(result);
-                   console.log(result +" + result 1" );
                 });
                 suggestion.addEventListener('mouseenter', function() {
                     if (inputElement === codeInput) {
@@ -205,7 +204,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     precio_publico: selectedSuggestion.dataset.precio
                 };
                 selectSuggestion(result);
-                console.log(result+" + result 2");
             } else {
                 const code = this.value.trim();
                 if (code) {
@@ -220,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (results.length > 0) {
                             const result = results[0];
                             selectSuggestion(result);
-                            console.log(result+" + result 3");
                             this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
                         }
                     });
@@ -243,7 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     precio_publico: selectedSuggestion.dataset.precio
                 };
                 selectSuggestion(result);
-                console.log(result+" + result 4");
             } else {
                 const name = this.value.trim();
                 if (name) {
@@ -258,7 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (results.length > 0) {
                             const result = results[0];
                             selectSuggestion(result);
-                            console.log(result+" + result 5");
                             this.value = ''; // Limpiar el valor del campo de entrada después de agregar el producto
                         }
                     });
@@ -323,12 +318,6 @@ function handleKeyboardNavigation(event, inputElement) {
                     console.error('Error al obtener el producto escaneado:', error);
                     return;
                 }
-
-                /*if (results.length > 0) {
-                    const result = results[0];
-                    selectSuggestion(result);
-                    console.log(result+" + result 6");
-                }*/
             });
         }
     });
@@ -350,7 +339,6 @@ function handleKeyboardNavigation(event, inputElement) {
     });
 
     confirmReceivedAmountButton.addEventListener('click', function() {
-        console.log('Botón "Confirmar" clickeado');
         const receivedAmount = parseFloat(receivedAmountInput.value);
         const totalAmount = total.toFixed(2);
 
@@ -377,12 +365,93 @@ function handleKeyboardNavigation(event, inputElement) {
     });
 
     finishButton.addEventListener('click', function() {
-        console.log('Botón "Terminar" clickeado');
         modalReceivedAmount.hidden = false;
         blurCodeInput();
     });
 
-    function generateTicket() {
+    function saveData() {
+        const connection = global.dbConnection;
+        const date = new Date().toISOString().slice(0, 10); // Obtener la fecha actual en formato YYYY-MM-DD
+        const total = calculateTotal(); // Función para calcular el total de la venta
+        const ticket = getTicketContent(); // Función para obtener el contenido completo de la tabla HTML
+      
+        calculateGain((error, gain) => {
+          if (error) {
+            console.error('Error al calcular la ganancia:', error);
+            return;
+          }
+      
+          const query = 'INSERT INTO ventas (fecha, total, ganancia, ticket) VALUES (?, ?, ?, ?)';
+          connection.query(query, [date, total, gain, ticket], (error, results) => {
+            if (error) {
+              console.error('Error al insertar en la tabla ventas:', error);
+            }
+          });
+        });
+      }
+      
+      function calculateTotal() {
+        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
+        let total = 0;
+      
+        tableContent.forEach(row => {
+          const quantity = parseInt(row.cells[3].textContent);
+          const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+          const subtotal = quantity * price;
+          total += subtotal;
+        });
+      
+        return total;
+      }
+      
+      function calculateGain(callback) {
+        const connection = global.dbConnection;
+        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
+        let gain = 0;
+        let completedQueries = 0;
+      
+        tableContent.forEach(row => {
+          const productCode = row.cells[0].textContent;
+          const quantity = parseInt(row.cells[3].textContent);
+          const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+      
+          const query = 'SELECT precio_proveedor FROM productos WHERE codigo_producto = ?';
+          connection.query(query, [productCode], (error, results) => {
+            if (error) {
+              console.error('Error al obtener el precio de proveedor:', error);
+              callback(error, null);
+            } else {
+              const providerPrice = parseFloat(results[0].precio_proveedor);
+              const productGain = (price - providerPrice) * quantity;
+              gain += productGain;
+      
+              completedQueries++;
+              if (completedQueries === tableContent.length) {
+                callback(null, gain);
+              }
+            }
+          });
+        });
+      }
+      
+      function getTicketContent() {
+        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
+        let ticket = '';
+      
+        tableContent.forEach(row => {
+          const productCode = row.cells[0].textContent;
+          const productName = row.cells[1].textContent;
+          const category = row.cells[2].textContent;
+          const quantity = row.cells[3].textContent;
+          const price = row.cells[4].textContent;
+          const subtotal = row.cells[5].textContent;
+      
+          ticket += `${productCode} | ${productName} | ${category} | ${quantity} | ${price} | ${subtotal}\n`;
+        });
+      
+        return ticket;
+      }
+      function generateTicket() {
         const ticketContent = Array.from(tableBody.querySelectorAll('tr'))
           .map(row => {
             const productName = row.cells[1].textContent;
@@ -414,10 +483,13 @@ function handleKeyboardNavigation(event, inputElement) {
         total = 0;
         totalDisplay.textContent = '$0.00';
         modalChange.hidden = true;
+
         focusCodeInput();
+
     });
 
     finishSaleWithouthTicketButton.addEventListener('click', function() {
+        saveData();
         tableBody.innerHTML = '';
         total = 0;
         totalDisplay.textContent = '$0.00';

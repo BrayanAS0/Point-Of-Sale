@@ -4,28 +4,245 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f0f0f0;
 }
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
 nav {
-    width: 200px;
-    background-color: #333;
-    color: #fff;
-    min-height: 100vh;
-  }
-  
-  nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-  }
-  
-  nav li {
-    padding: 10px;
-  }
-  
-  nav a {
-    color: #fff;
-    text-decoration: none;
-    width: 100%;
-    display: inline-block;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  min-height: 100%;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+nav li {
+  padding: 10px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  width: 100%;
+  display: inline-block;
   font-size: 25px;
-  }
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-container {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.search-container input {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+  margin-right: 10px;
+}
+
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+#search-results li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+#search-results li:hover {
+  background-color: #f0f0f0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th, td {
+  border: 1px solid #000000;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 20px;
+  box-sizing: border-box;
+  position: relative;
+  word-wrap: break-word;
+}
+td{
+border: 1px solid #000;}
+tr {
+  background-color: #ddd;
+  box-sizing: border-box;
+}
+th{
+  background-color: #d4d4d4;}
+th:nth-child(1), td:nth-child(1) {
+  width: 10%;
+}
+
+th:nth-child(2), td:nth-child(2) {
+  width: 20%;
+}
+
+th:nth-child(3), td:nth-child(3) {
+  text-align: center;
+  width: 20;
+}
+
+th:nth-child(4), td:nth-child(4) {
+  text-align: center;
+  width: 20%;
+}
+
+th:nth-child(5), td:nth-child(5) {
+  width: 20%;
+}
+
+
+td input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: none;
+  background-color: white;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.fila-resaltada {
+  background-color: red;
+  color: rgb(0, 0, 0);
+}
+.search-container {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.search-container input {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+  margin-right: 10px;
+}
+
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+#search-results li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+#search-results li:hover {
+  background-color: #c81212;
+}
+#search-results li.selected {
+  background-color: #c81212;
+}
+
+.ticket-content {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  width: 50%;
+  height: 90%;
+  background-color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
+#close-button{
+  position: absolute;
+  top: 0;
+
+  right: 0;
+
+width: 40px;
+  font-size: 20px;
+  box-sizing: border-box;
+ 
+}
+#trash{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+table {
+  width: 100%;
+
+
+  margin-top: 10px;
+}
+.ticket-content th, td {
+  padding: 5px;
+  text-align: center;
+  font-size: 11px;
+}
+th{
+  border-bottom: 1px solid #000000;
+  border-top: 1px solid #000000;
+}
+.total {
+  margin-top: 10px;
+  text-align: right;
+}
+.footer {
+  margin-top: 10px;
+  text-align: center;
+}
+.date-time {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 10px;
+}
