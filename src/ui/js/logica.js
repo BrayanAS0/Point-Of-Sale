@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const connection = global.dbConnection;
     const { remote } = require('electron');
 
+
+    const insufficientMoney = document.getElementById('insufficient-money');
+    const insufficientMoneyText = document.getElementById('insufficient-money-text');
+    const insufficientMoneyInput = document.getElementById('insufficient-money-input');
+    const insufficientMoneyButton = document.getElementById('insufficient-money-button');
+
     const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
@@ -227,7 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
             handleKeyboardNavigation(event, this);
         }
     });
-
+insufficientMoneyButton.addEventListener('click', function() {
+    insufficientMoney.hidden = true;
+});
     nameInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -350,10 +358,11 @@ function handleKeyboardNavigation(event, inputElement) {
                 modalReceivedAmount.hidden = true;
                 modalChange.hidden = false;
             } else {
-                alert(`Falta dinero por pagar: $${Math.abs(change).toFixed(2)}`);
+                insufficientMoney.hidden = false;
+                insufficientMoneyInput.value = Math.abs(change).toFixed(2);
+                modalReceivedAmount.hidden = true;
+
             }
-        } else {
-            alert('Por favor, ingrese un número válido.');
         }
     });
 
@@ -528,6 +537,8 @@ function handleKeyboardNavigation(event, inputElement) {
         ipcRenderer.send('print-ticket', { ticketContent, totalAmount, currentDate, currentTime });
       }
     finishSaleWithTicketButton.addEventListener('click', function() {
+        updateProductQuantities();
+        saveData();
         generateTicket();
         tableBody.innerHTML = '';
         total = 0;
