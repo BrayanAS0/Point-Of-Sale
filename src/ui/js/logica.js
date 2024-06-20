@@ -371,9 +371,20 @@ function handleKeyboardNavigation(event, inputElement) {
 
     function saveData() {
         const connection = global.dbConnection;
-        const date = new Date().toISOString().slice(0, 10); // Obtener la fecha actual en formato YYYY-MM-DD
-        const total = calculateTotal(); // Función para calcular el total de la venta
-        const ticket = getTicketContent(); // Función para obtener el contenido completo de la tabla HTML
+        const date = new Date();
+        const formattedDate = date.toLocaleString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const formattedTime = date.toLocaleString('es-ES', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'America/Mexico_City'
+        });
+        const total = calculateTotal();
+        const ticket = getTicketContent();
       
         calculateGain((error, gain) => {
           if (error) {
@@ -381,15 +392,14 @@ function handleKeyboardNavigation(event, inputElement) {
             return;
           }
       
-          const query = 'INSERT INTO ventas (fecha, total, ganancia, ticket) VALUES (?, ?, ?, ?)';
-          connection.query(query, [date, total, gain, ticket], (error, results) => {
+          const query = 'INSERT INTO ventas (fecha, hora, total, ganancia, ticket) VALUES (?, ?, ?, ?, ?)';
+          connection.query(query, [formattedDate, formattedTime, total, gain, ticket], (error, results) => {
             if (error) {
               console.error('Error al insertar en la tabla ventas:', error);
             }
           });
         });
       }
-      
       function calculateTotal() {
         const tableContent = Array.from(tableBody.querySelectorAll('tr'));
         let total = 0;
