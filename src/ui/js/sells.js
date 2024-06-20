@@ -1,8 +1,9 @@
+// Función para cargar los datos de la tabla
 function cargarDatos() {
   const connection = global.dbConnection;
   connection.query(`
     SELECT * FROM ventas
-    ORDER BY fecha
+    ORDER BY id_venta
   `, (error, results) => {
     if (error) {
       console.error('Error al obtener los datos:', error);
@@ -10,44 +11,80 @@ function cargarDatos() {
     }
 
     console.log('Resultados de la consulta:', results);
-
-    const tableBody = document.getElementById('table-body');
-    tableBody.innerHTML = '';
-
-    results.forEach(venta => {
-      const fila = document.createElement('tr');
-
-      fila.innerHTML = `
-        <td>${venta.id_venta}</td>
-        <td>${venta.fecha}</td>
-        <td>${venta.hora}</td>
-        <td>${venta.total}</td>
-        <td>${venta.ganancia}</td>
-        <td>
-          <button class="delete-button" data-id="${venta.id_venta}">X</button>
-          <button class="ticket-button" data-id="${venta.id_venta}">Ticket</button>
-        </td>
-      `;
-
-      // Agregar evento de clic al botón de eliminar
-      const deleteButton = fila.querySelector('.delete-button');
-      deleteButton.addEventListener('click', () => {
-        const ventaId = deleteButton.dataset.id;
-        eliminarVenta(ventaId);
-      });
-
-      // Agregar evento de clic al botón de ticket
-      const ticketButton = fila.querySelector('.ticket-button');
-      ticketButton.addEventListener('click', () => {
-        const ventaId = ticketButton.dataset.id;
-        showTicket(ventaId);
-      });
-
-      tableBody.appendChild(fila);
-    });
+    mostrarDatos(results);
   });
 }
 
+// Función para mostrar los datos en la tabla
+function mostrarDatos(results) {
+  const tableBody = document.getElementById('table-body');
+  tableBody.innerHTML = '';
+
+  results.forEach(venta => {
+    const fila = document.createElement('tr');
+
+    fila.innerHTML = `
+      <td>${venta.id_venta}</td>
+      <td>${venta.fecha}</td>
+      <td>${venta.hora}</td>
+      <td>${venta.total}</td>
+      <td>${venta.ganancia}</td>
+      <td>
+        <button class="delete-button" data-id="${venta.id_venta}">X</button>
+        <button class="ticket-button" data-id="${venta.id_venta}">Ticket</button>
+      </td>
+    `;
+
+    // Agregar evento de clic al botón de eliminar
+    const deleteButton = fila.querySelector('.delete-button');
+    deleteButton.addEventListener('click', () => {
+      const ventaId = deleteButton.dataset.id;
+      eliminarVenta(ventaId);
+    });
+
+    // Agregar evento de clic al botón de ticket
+    const ticketButton = fila.querySelector('.ticket-button');
+    ticketButton.addEventListener('click', () => {
+      const ventaId = ticketButton.dataset.id;
+      showTicket(ventaId);
+    });
+
+    tableBody.appendChild(fila);
+  });
+}
+
+// Función para realizar la búsqueda por folio
+function buscarPorFolio() {
+  const folioInput = document.getElementById('search-Folio');
+  const folio = folioInput.value.trim();
+
+  if (folio === '') {
+    // Si el campo de búsqueda está vacío, cargar todos los datos
+    cargarDatos();
+  } else {
+    const connection = global.dbConnection;
+    connection.query(`
+      SELECT * FROM ventas
+      WHERE id_venta LIKE ?
+      ORDER BY id_venta
+    `, [`%${folio}%`], (error, results) => {
+      if (error) {
+        console.error('Error al realizar la búsqueda:', error);
+        return;
+      }
+
+      console.log('Resultados de la búsqueda:', results);
+      mostrarDatos(results);
+    });
+  }
+}
+
+// Agregar evento de input al campo de búsqueda por folio
+const folioInput = document.getElementById('search-Folio');
+folioInput.addEventListener('input', buscarPorFolio);
+
+// Llamar a la función cargarDatos() cuando se cargue la página
+window.addEventListener('DOMContentLoaded', cargarDatos);
 function eliminarVenta(ventaId) {
   getVentaDetails(ventaId, (error, venta) => {
     if (error) {
