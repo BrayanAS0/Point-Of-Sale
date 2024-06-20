@@ -368,7 +368,47 @@ function handleKeyboardNavigation(event, inputElement) {
         modalReceivedAmount.hidden = false;
         blurCodeInput();
     });
-
+    function updateProductQuantities() {
+        const connection = global.dbConnection;
+        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
+      
+        const updatePromises = tableContent.map(row => {
+          const productCode = row.cells[0].textContent;
+          const quantityPurchased = parseFloat(row.cells[3].textContent);
+      
+          return new Promise((resolve, reject) => {
+            const selectQuery = 'SELECT cantidad FROM productos WHERE codigo_producto = ?';
+            connection.query(selectQuery, [productCode], (error, results) => {
+              if (error) {
+                console.error('Error al obtener la cantidad del producto:', error);
+                reject(error);
+              } else {
+                const currentQuantity = parseFloat(results[0].cantidad);
+                const newQuantity = currentQuantity - quantityPurchased;
+      
+                const updateQuery = 'UPDATE productos SET cantidad = ? WHERE codigo_producto = ?';
+                connection.query(updateQuery, [newQuantity, productCode], (error, results) => {
+                  if (error) {
+                    console.error('Error al actualizar la cantidad del producto:', error);
+                    reject(error);
+                  } else {
+                    console.log(`Cantidad actualizada para el producto ${productCode}. Nueva cantidad: ${newQuantity}`);
+                    resolve();
+                  }
+                });
+              }
+            });
+          });
+        });
+      
+        Promise.all(updatePromises)
+          .then(() => {
+            console.log('Cantidades de productos actualizadas correctamente');
+          })
+          .catch(error => {
+            console.error('Error al actualizar las cantidades de los productos:', error);
+          });
+      }
     function saveData() {
         const connection = global.dbConnection;
         const date = new Date();
@@ -499,6 +539,7 @@ function handleKeyboardNavigation(event, inputElement) {
     });
 
     finishSaleWithouthTicketButton.addEventListener('click', function() {
+        updateProductQuantities();
         saveData();
         tableBody.innerHTML = '';
         total = 0;
