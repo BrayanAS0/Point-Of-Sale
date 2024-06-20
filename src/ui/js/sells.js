@@ -2,7 +2,7 @@ function cargarDatos() {
   const connection = global.dbConnection;
   connection.query(`
     SELECT * FROM ventas
-    ORDER BY fecha, hora
+    ORDER BY fecha
   `, (error, results) => {
     if (error) {
       console.error('Error al obtener los datos:', error);
@@ -45,6 +45,78 @@ function cargarDatos() {
 
       tableBody.appendChild(fila);
     });
+  });
+}
+
+function eliminarVenta(ventaId) {
+  getVentaDetails(ventaId, (error, venta) => {
+    if (error) {
+      console.error('Error al obtener los detalles de la venta:', error);
+      return;
+    }
+
+    const connection = global.dbConnection;
+    const ticketContent = venta.ticket;
+
+    // Dividir el contenido del ticket en filas
+    const ticketRows = ticketContent.trim().split('\n');
+
+    // Construir la consulta de actualización de productos
+    const updateProductQuery = `
+      UPDATE productos
+      SET cantidad = CASE codigo_producto
+        ${ticketRows.map(row => {
+          const [productCode, productName, category, quantity, price, subtotal] = row.split('|').map(item => item.trim());
+          return `WHEN '${productCode}' THEN cantidad + ${parseFloat(quantity)}`;
+        }).join('\n        ')}
+        ELSE cantidad
+      END
+      WHERE codigo_producto IN (${ticketRows.map(row => {
+        const [productCode] = row.split('|').map(item => item.trim());
+        return `'${productCode}'`;
+      }).join(', ')});
+    `;
+
+    // Eliminar la venta de la tabla ventas
+    const deleteVentaQuery = `
+      DELETE FROM ventas
+      WHERE id_venta = ?;
+    `;
+
+    // Ejecutar las consultas de actualización de productos y eliminación de venta
+    connection.query(updateProductQuery, (error, results) => {
+      if (error) {
+        console.error('Error al actualizar las cantidades de los productos:', error);
+        return;
+      }
+
+      connection.query(deleteVentaQuery, [ventaId], (error, results) => {
+        if (error) {
+          console.error('Error al eliminar la venta:', error);
+          return;
+        }
+
+        console.log('Venta eliminada y cantidades de productos actualizadas.');
+        // Aquí puedes realizar alguna acción adicional después de eliminar la venta
+        cargarDatos(); // Volver a cargar los datos después de eliminar la venta
+      });
+    });
+  });
+}
+function getVentaDetails(ventaId, callback) {
+  const connection = global.dbConnection;
+  const query = `
+    SELECT * FROM ventas
+    WHERE id_venta = ?
+  `;
+  connection.query(query, [ventaId], (error, results) => {
+    if (error) {
+      console.error('Error al obtener los datos de la venta:', error);
+      callback(error, null);
+    } else {
+      const venta = results[0];
+      callback(null, venta);
+    }
   });
 }
 function showTicket(ventaId) {
@@ -105,7 +177,7 @@ function showTicket(ventaId) {
 window.addEventListener('DOMContentLoaded', cargarDatos);
 
 const closeButton = document.getElementById('close-button');
-closeButton.addEventListener('click', () => {
+closeButton.addEventListener('click', () => {  
 const ticketContainer = document.getElementById('ticket-container');
 ticketContainer.style.display = 'none';
 });
