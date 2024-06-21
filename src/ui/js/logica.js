@@ -510,23 +510,20 @@ function handleKeyboardNavigation(event, inputElement) {
       
         return ticket;
       }
-      function generateTicket() {
+      function generateTicket(ventaId) {
         const ticketContent = Array.from(tableBody.querySelectorAll('tr'))
           .map(row => {
             const productName = row.cells[1].textContent;
             const quantity = parseInt(row.cells[3].textContent);
             const price = parseFloat(row.cells[4].textContent.replace('$', ''));
             const subtotal = quantity * price;
-            return `
-              <tr>
-                <td>${quantity}</td>
-                <td>${productName}</td>
-                <td>$${price.toFixed(2)}</td>
-                <td>$${subtotal.toFixed(2)}</td>
-              </tr>
-            `;
-          })
-          .join('');
+            return {
+              quantity,
+              productName,
+              price,
+              subtotal
+            };
+          });
       
         const totalAmount = total; // Obtener el total calculado
       

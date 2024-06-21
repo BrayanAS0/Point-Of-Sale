@@ -1,5 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const mysql = require('mysql2');
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
 
 // Configuración de la conexión a la base de datos
 const connection = mysql.createConnection({
@@ -8,112 +11,65 @@ const connection = mysql.createConnection({
   password: 'root',
   database: 'pos'
 });
+
 global.dbConnection = connection;
 
-function createPrintWindow(ticketContent, totalAmount, currentDate, currentTime) {
-  const printWindow = new BrowserWindow({
-    width: 300, // Ancho ajustado para un ticket de 80mm
-    height: 600,
-    show: false,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
+function createPrintTicket(ticketContent, totalAmount, currentDate, currentTime) {
+  const tempDir = path.join(__dirname, 'temp');
+  const iniFilePath = path.join(tempDir, 'ticket.ini');
+
+  // Asegurarse de que el directorio temporal existe
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir);
+  }
+
+  // Crear el contenido del archivo .ini
+  let iniContent = '[Ticket]\n';
+  iniContent += 'Tienda=Ferretera\n';
+  iniContent += 'Direccion=Dirección\n\n';
+  iniContent += '[Productos]\n';
+
+  // Agregar los productos al contenido
+  ticketContent.forEach((item, index) => {
+    iniContent += `Producto${index + 1}=${item.quantity},${item.product},${item.price},${item.amount}\n`;
   });
 
-  printWindow.loadURL(`data:text/html,${encodeURIComponent(`
-<html>
-    <head>
-        <meta charset="UTF-8">
+  iniContent += '\n[Total]\n';
+  iniContent += `Monto=${totalAmount.toFixed(2)}\n\n`;
+  iniContent += '[Footer]\n';
+  iniContent += 'Mensaje=¡Gracias por su compra!\n';
+  iniContent += `Fecha=${currentDate}\n`;
+  iniContent += `Hora=${currentTime}\n`;
 
-      <style>
-        body {
-          font-family: monospace;
-          font-size: 10px;
-          margin: 0;
-          padding: 10px;
-          min-width: 70mm;
-          max-width: 70mm;
+  // Escribir el contenido en el archivo .ini
+  fs.writeFileSync(iniFilePath, iniContent);
 
-          box-sizing: border-box;
-        }
-        .ticket-content {
-          text-align: center;
-        }
-        table {
-          width: 100%;
+  // Imprimir el archivo .ini
+  exec(`notepad /p "${iniFilePath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error al imprimir: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Error de impresión: ${stderr}`);
+      return;
+    }
+    console.log('Ticket impreso correctamente');
 
-
-          margin-top: 10px;
-        }
-        th, td {
-          padding: 5px;
-          text-align: center;
-          font-size: 11px;
-        }
-        th{
-          border-bottom: 1px solid #000000;
-          border-top: 1px solid #000000;
-        }
-        .total {
-          margin-top: 10px;
-          text-align: right;
-        }
-        .footer {
-          margin-top: 10px;
-          text-align: center;
-        }
-        .date-time {
-          margin-top: 10px;
-          text-align: center;
-          font-size: 10px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="ticket-content">
-        <h3>Ferretera</h3>
-        <p>Dirección</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Cantidad</th>
-              <th>Producto</th>
-              <th>Precio</th>
-              <th>Importe</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            ${ticketContent}
-          </tbody>
-        </table>
-        <div class="total">
-          <p style="font-weight: bold;">Total: $${totalAmount.toFixed(2)}</p>
-        </div>
-        <div class="footer">
-          <p>¡Gracias por su compra!</p>
-        </div>
-        <div class="date-time">
-          <p style="font-weight: bold;">${currentDate} ${currentTime}</p>
-        </div>
-      </div>
-    </body>
-  </html>
-  `)}`);
-
-  printWindow.webContents.on('did-finish-load', () => {
-    printWindow.webContents.print({ silent: true, printBackground: false }, (success, failureReason) => {
-      if (!success) {
-        console.error('Error al imprimir el ticket:', failureReason);
-      }
-      printWindow.close();
-    });
+    // Eliminar el archivo .ini después de imprimir
+    fs.unlinkSync(iniFilePath);
   });
 }
 
 ipcMain.on('print-ticket', (event, { ticketContent, totalAmount, currentDate, currentTime }) => {
-  createPrintWindow(ticketContent, totalAmount, currentDate, currentTime);
+  const formattedTicketContent = ticketContent.map(item => ({
+    quantity: item.quantity,
+    product: item.productName,
+    price: item.price,
+    amount: item.subtotal
+  }));
+
+  createPrintTicket(formattedTicketContent, totalAmount, currentDate, currentTime);
 });
 
 const createWindow = () => {
@@ -123,12 +79,12 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true, // Habilitar el módulo 'remote'
+      enableRemoteModule: true,
     }
   });
 
   console.log('Cargando archivo HTML...');
-  win.loadFile('src//ui//html/index.html');
+  win.loadFile('src/ui/html/index.html');
 };
 
 app.whenReady().then(() => {
