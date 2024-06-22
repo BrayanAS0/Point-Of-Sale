@@ -2,7 +2,8 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const escpos = require('escpos');
+escpos.USB = require('escpos-usb');
 
 // Configuración de la conexión a la base de datos
 const connection = mysql.createConnection({
@@ -14,54 +15,75 @@ const connection = mysql.createConnection({
 
 global.dbConnection = connection;
 
-function createPrintTicket(ticketContent, totalAmount, currentDate, currentTime) {
-  const tempDir = path.join(__dirname, 'temp');
-  const iniFilePath = path.join(tempDir, 'ticket.ini');
+async function printOrGenerateTicket(ticketContent, totalAmount, currentDate, currentTime) {
+  try {
+    // Intenta encontrar una impresora USB
+    const device = new escpos.USB();
+    const options = { encoding: "GB18030" /* o el que corresponda a tu región */ }
+    const printer = new escpos.Printer(device, options);
 
-  // Asegurarse de que el directorio temporal existe
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir);
+    device.open(function(error){
+      if(error){
+        console.error('No se pudo conectar a la impresora USB:', error);
+        generateTextTicket(ticketContent, totalAmount, currentDate, currentTime);
+        return;
+      }
+
+      printer
+      .font('a')
+      .align('ct')
+      .style('bu')
+      .size(1, 1)
+      .text('Ferretera')
+      .text('Dirección')
+      .text('---------------------------')
+      .align('lt')
+      .text('Productos:')
+      
+      ticketContent.forEach((item) => {
+        printer.text(`${item.quantity} ${item.product} ${item.price} ${item.amount}`);
+      });
+
+      printer
+      .text('---------------------------')
+      .align('rt')
+      .text(`Total: ${totalAmount.toFixed(2)}`)
+      .align('ct')
+      .text('¡Gracias por su compra!')
+      .text(`Fecha: ${currentDate}`)
+      .text(`Hora: ${currentTime}`)
+      .cut()
+      .close();
+    });
+
+  } catch (error) {
+    console.error('Error al intentar imprimir:', error);
+    generateTextTicket(ticketContent, totalAmount, currentDate, currentTime);
   }
-
-  // Crear el contenido del archivo .ini
-  let iniContent = '[Ticket]\n';
-  iniContent += 'Tienda=Ferretera\n';
-  iniContent += 'Direccion=Dirección\n\n';
-  iniContent += '[Productos]\n';
-
-  // Agregar los productos al contenido
-  ticketContent.forEach((item, index) => {
-    iniContent += `Producto${index + 1}=${item.quantity},${item.product},${item.price},${item.amount}\n`;
-  });
-
-  iniContent += '\n[Total]\n';
-  iniContent += `Monto=${totalAmount.toFixed(2)}\n\n`;
-  iniContent += '[Footer]\n';
-  iniContent += 'Mensaje=¡Gracias por su compra!\n';
-  iniContent += `Fecha=${currentDate}\n`;
-  iniContent += `Hora=${currentTime}\n`;
-
-  // Escribir el contenido en el archivo .ini
-  fs.writeFileSync(iniFilePath, iniContent);
-
-  // Imprimir el archivo .ini
-  exec(`notepad /p "${iniFilePath}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error al imprimir: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Error de impresión: ${stderr}`);
-      return;
-    }
-    console.log('Ticket impreso correctamente');
-
-    // Eliminar el archivo .ini después de imprimir
-    fs.unlinkSync(iniFilePath);
-  });
 }
 
-ipcMain.on('print-ticket', (event, { ticketContent, totalAmount, currentDate, currentTime }) => {
+function generateTextTicket(ticketContent, totalAmount, currentDate, currentTime) {
+  let ticketText = 'Ferretera\n';
+  ticketText += 'Dirección\n';
+  ticketText += '---------------------------\n';
+  ticketText += 'Productos:\n';
+
+  ticketContent.forEach((item) => {
+    ticketText += `${item.quantity} ${item.product} ${item.price} ${item.amount}\n`;
+  });
+
+  ticketText += '---------------------------\n';
+  ticketText += `Total: ${totalAmount.toFixed(2)}\n`;
+  ticketText += '¡Gracias por su compra!\n';
+  ticketText += `Fecha: ${currentDate}\n`;
+  ticketText += `Hora: ${currentTime}\n`;
+
+  const ticketFilePath = path.join(__dirname, 'ticket.txt');
+  fs.writeFileSync(ticketFilePath, ticketText);
+  console.log(`Ticket generado en: ${ticketFilePath}`);
+}
+
+ipcMain.on('print-ticket', async (event, { ticketContent, totalAmount, currentDate, currentTime }) => {
   const formattedTicketContent = ticketContent.map(item => ({
     quantity: item.quantity,
     product: item.productName,
@@ -69,7 +91,7 @@ ipcMain.on('print-ticket', (event, { ticketContent, totalAmount, currentDate, cu
     amount: item.subtotal
   }));
 
-  createPrintTicket(formattedTicketContent, totalAmount, currentDate, currentTime);
+  await printOrGenerateTicket(formattedTicketContent, totalAmount, currentDate, currentTime);
 });
 
 const createWindow = () => {
