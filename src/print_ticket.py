@@ -20,7 +20,7 @@ def get_ticket_data(venta_id):
     cursor = connection.cursor(dictionary=True)
     
     query = "SELECT * FROM ventas WHERE id_venta = %s"
-    cursor.execute(query, (venta_id,))
+    cursor.execute(query, (venta_id+1,))
     venta = cursor.fetchone()
     
     cursor.close()
@@ -63,7 +63,7 @@ def create_and_print_ticket(venta_id):
         + f"Fecha: {venta['fecha']}\n".encode('cp437')
         + f"Hora: {venta['hora']}\n".encode('cp437')
         + f"Folio: {venta['id_venta']}\n".encode('cp437')
-        + unidecode.unidecode("Producto                      Cant   Precio   Importe\n").encode('cp437')
+        + unidecode.unidecode("Producto                 Cant   Precio   Importe\n").encode('cp437')
         + b"-" * 48 + b"\n"
     )
     
