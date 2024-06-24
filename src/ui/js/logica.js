@@ -1,3 +1,5 @@
+const { ipcRenderer } = require('electron');
+
 document.addEventListener('DOMContentLoaded', function() {
     const connection = global.dbConnection;
     const { remote } = require('electron');
@@ -410,60 +412,57 @@ function handleKeyboardNavigation(event, inputElement) {
           });
         });
       
-        Promise.all(updatePromises)
-          .then(() => {
-            console.log('Cantidades de productos actualizadas correctamente');
-          })
-          .catch(error => {
-            console.error('Error al actualizar las cantidades de los productos:', error);
-          });
-      }
+        return Promise.all(updatePromises);
+    }
+    
     function saveData() {
         const connection = global.dbConnection;
         const date = new Date();
-        const formattedDate = date.toLocaleString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
+        const formattedDate = date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
         });
-        const formattedTime = date.toLocaleString('es-ES', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          timeZone: 'America/Mexico_City'
+        const formattedTime = date.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'America/Mexico_City'
         });
         const total = calculateTotal();
         const ticket = getTicketContent();
-      
+    
         calculateGain((error, gain) => {
-          if (error) {
-            console.error('Error al calcular la ganancia:', error);
-            return;
-          }
-      
-          const query = 'INSERT INTO ventas (fecha, hora, total, ganancia, ticket) VALUES (?, ?, ?, ?, ?)';
-          connection.query(query, [formattedDate, formattedTime, total, gain, ticket], (error, results) => {
             if (error) {
-              console.error('Error al insertar en la tabla ventas:', error);
+                console.error('Error al calcular la ganancia:', error);
+                return;
             }
-          });
+    
+            const query = 'INSERT INTO ventas (fecha, hora, total, ganancia, ticket) VALUES (?, ?, ?, ?, ?)';
+            connection.query(query, [formattedDate, formattedTime, total, gain, ticket], (error, results) => {
+                if (error) {
+                    console.error('Error al insertar en la tabla ventas:', error);
+                } else {
+                    console.log('Venta guardada correctamente');
+                }
+            });
         });
-      }
-      function calculateTotal() {
-        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
-        let total = 0;
-      
+    }
+    function calculateTotal() {
+        const tableContent = Array.from(tableBody.querySelectorAll)
+            let total = 0;
+    
         tableContent.forEach(row => {
-          const quantity = parseInt(row.cells[3].textContent);
-          const price = parseFloat(row.cells[4].textContent.replace('$', ''));
-          const subtotal = quantity * price;
-          total += subtotal;
+            const quantity = parseFloat(row.cells[3].textContent);
+            const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+            if (!isNaN(quantity) && !isNaN(price)) {
+                total += quantity * price;
+            }
         });
-      
+    
         return total;
-      }
-      
-      function calculateGain(callback) {
+    }
+    function calculateGain(callback) {
         const connection = global.dbConnection;
         const tableContent = Array.from(tableBody.querySelectorAll('tr'));
         let gain = 0;
@@ -471,7 +470,7 @@ function handleKeyboardNavigation(event, inputElement) {
       
         tableContent.forEach(row => {
           const productCode = row.cells[0].textContent;
-          const quantity = parseInt(row.cells[3].textContent);
+          const quantity = parseFloat(row.cells[3].textContent);
           const price = parseFloat(row.cells[4].textContent.replace('$', ''));
       
           const query = 'SELECT precio_proveedor FROM productos WHERE codigo_producto = ?';
@@ -491,9 +490,9 @@ function handleKeyboardNavigation(event, inputElement) {
             }
           });
         });
-      }
-      
-      function getTicketContent() {
+    }
+    
+    function getTicketContent() {
         const tableContent = Array.from(tableBody.querySelectorAll('tr'));
         let ticket = '';
       
@@ -509,53 +508,122 @@ function handleKeyboardNavigation(event, inputElement) {
         });
       
         return ticket;
-      }
-      function generateTicket(ventaId) {
-        const ticketContent = Array.from(tableBody.querySelectorAll('tr'))
-          .map(row => {
-            const productName = row.cells[1].textContent;
-            const quantity = parseInt(row.cells[3].textContent);
+    }
+    
+    async function generateTicket() {
+        try {
+            const ticketContent = Array.from(tableBody.querySelectorAll('tr')).map(row => {
+                const productName = row.cells[1].textContent;
+                const quantity = parseFloat(row.cells[3].textContent);
+                const price = parseFloat(row.cells[4].textContent.replace('$', ''));
+                const subtotal = quantity * price;
+                return {
+                    quantity,
+                    productName,
+                    price: price.toFixed(2),
+                    subtotal: subtotal.toFixed(2)
+                };
+            });
+    
+            const totalAmount = calculateTotal();
+    
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+            const ventaId = await obtenerUltimoIdVenta();
+    
+            console.log('Enviando datos del ticket al proceso principal para impresión...');
+            ipcRenderer.send('print-ticket', { 
+                ticketContent, 
+                totalAmount, 
+                currentDate,   
+                currentTime,
+                ventaId 
+            });
+    
+            return new Promise((resolve, reject) => {
+                ipcRenderer.once('print-ticket-response', (event, response) => {
+                    if (response.success) {
+                        console.log('Ticket impreso correctamente');
+                        resolve();
+                    } else {
+                        console.error('Error al imprimir el ticket:', response.error);
+                        reject(new Error(response.error));
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error al generar el ticket:', error);
+            throw error;
+        }
+    }
+    
+    // Agregar un listener para recibir la respuesta del proceso principal
+    ipcRenderer.on('print-ticket-response', (event, response) => {
+        if (response.success) {
+            console.log('Ticket impreso correctamente');
+        } else {
+            console.error('Error al imprimir el ticket:', response.error);
+        }
+    });
+    
+    function calculateTotal() {
+        const tableContent = Array.from(tableBody.querySelectorAll('tr'));
+        let total = 0;
+    
+        tableContent.forEach(row => {
+            const quantity = parseFloat(row.cells[3].textContent);
             const price = parseFloat(row.cells[4].textContent.replace('$', ''));
-            const subtotal = quantity * price;
-            return {
-              quantity,
-              productName,
-              price,
-              subtotal
-            };
+            if (!isNaN(quantity) && !isNaN(price)) {
+                total += quantity * price;
+            }
+        });
+    
+        return total;
+    }
+      async function obtenerUltimoIdVenta() {
+        return new Promise((resolve, reject) => {
+          const connection = global.dbConnection;
+          const query = "SELECT MAX(id_venta) as ultimo_id FROM ventas";
+          
+          connection.query(query, (error, results) => {
+            if (error) {
+              console.error('Error al obtener el último ID de venta:', error);
+              reject(error);
+            } else {
+              const ultimoId = results[0].ultimo_id || 0;
+              resolve(ultimoId);
+            }
           });
-      
-        const totalAmount = total; // Obtener el total calculado
-      
-        const currentDate = new Date().toLocaleDateString();
-        const currentTime = new Date().toLocaleTimeString();
-      
-        const { ipcRenderer } = require('electron');
-        ipcRenderer.send('print-ticket', { ticketContent, totalAmount, currentDate, currentTime });
+        });
       }
-    finishSaleWithTicketButton.addEventListener('click', function() {
-        updateProductQuantities();
-        saveData();
-        generateTicket();
-        tableBody.innerHTML = '';
-        total = 0;
-        totalDisplay.textContent = '$0.00';
-        modalChange.hidden = true;
-
-        focusCodeInput();
-
+      finishSaleWithTicketButton.addEventListener('click', async function() {
+        try {
+            await updateProductQuantities();
+            saveData();
+            await generateTicket(); // Esperar a que se complete la impresión
+            tableBody.innerHTML = '';
+            total = 0;
+            totalDisplay.textContent = '$0.00';
+            modalChange.hidden = true;
+            focusCodeInput();
+        } catch (error) {
+            console.error('Error al finalizar la venta:', error);
+            // Aquí podrías mostrar un mensaje de error al usuario
+        }
     });
-
-    finishSaleWithouthTicketButton.addEventListener('click', function() {
-        updateProductQuantities();
-        saveData();
-        tableBody.innerHTML = '';
-        total = 0;
-        totalDisplay.textContent = '$0.00';
-        modalChange.hidden = true;
-        focusCodeInput();
+    finishSaleWithouthTicketButton.addEventListener('click', async function() {
+        try {
+            await updateProductQuantities();
+            saveData();
+            tableBody.innerHTML = '';
+            total = 0;
+            totalDisplay.textContent = '$0.00';
+            modalChange.hidden = true;
+            focusCodeInput();
+        } catch (error) {
+            console.error('Error al finalizar la venta:', error);
+        }
     });
-
     cancelModalChangeButton.addEventListener('click', function() {
         modalChange.hidden = true;
         focusCodeInput();

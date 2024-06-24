@@ -1,9 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const mysql = require('mysql2');
-const fs = require('fs');
+const { exec } = require('child_process');
 const path = require('path');
-const escpos = require('escpos');
-escpos.USB = require('escpos-usb');
 
 // Configuración de la conexión a la base de datos
 const connection = mysql.createConnection({
@@ -15,89 +13,43 @@ const connection = mysql.createConnection({
 
 global.dbConnection = connection;
 
-async function printOrGenerateTicket(ticketContent, totalAmount, currentDate, currentTime) {
-  try {
-    // Intenta encontrar una impresora USB
-    const device = new escpos.USB();
-    const options = { encoding: "GB18030" /* o el que corresponda a tu región */ }
-    const printer = new escpos.Printer(device, options);
-
-    device.open(function(error){
-      if(error){
-        console.error('No se pudo conectar a la impresora USB:', error);
-        generateTextTicket(ticketContent, totalAmount, currentDate, currentTime);
+function printTicket(ticketData) {
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(__dirname, 'print_ticket.py');
+    const ventaId = ticketData.ventaId;
+    
+    console.log(`Ejecutando script de Python con ventaId: ${ventaId}`);
+    
+    exec(`python "${pythonScript}" ${ventaId}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error al ejecutar el script de Python: ${error}`);
+        reject(error);
         return;
       }
-
-      printer
-      .font('a')
-      .align('ct')
-      .style('bu')
-      .size(1, 1)
-      .text('Ferretera')
-      .text('Dirección')
-      .text('---------------------------')
-      .align('lt')
-      .text('Productos:')
-      
-      ticketContent.forEach((item) => {
-        printer.text(`${item.quantity} ${item.product} ${item.price} ${item.amount}`);
-      });
-
-      printer
-      .text('---------------------------')
-      .align('rt')
-      .text(`Total: ${totalAmount.toFixed(2)}`)
-      .align('ct')
-      .text('¡Gracias por su compra!')
-      .text(`Fecha: ${currentDate}`)
-      .text(`Hora: ${currentTime}`)
-      .cut()
-      .close();
+      if (stderr) {
+        console.error(`Error en el script de Python: ${stderr}`);
+        reject(new Error(stderr));
+        return;
+      }
+      console.log(`Salida del script de Python: ${stdout}`);
+      resolve({ success: true, message: stdout });
     });
-
-  } catch (error) {
-    console.error('Error al intentar imprimir:', error);
-    generateTextTicket(ticketContent, totalAmount, currentDate, currentTime);
-  }
-}
-
-function generateTextTicket(ticketContent, totalAmount, currentDate, currentTime) {
-  let ticketText = 'Ferretera\n';
-  ticketText += 'Dirección\n';
-  ticketText += '---------------------------\n';
-  ticketText += 'Productos:\n';
-
-  ticketContent.forEach((item) => {
-    ticketText += `${item.quantity} ${item.product} ${item.price} ${item.amount}\n`;
   });
-
-  ticketText += '---------------------------\n';
-  ticketText += `Total: ${totalAmount.toFixed(2)}\n`;
-  ticketText += '¡Gracias por su compra!\n';
-  ticketText += `Fecha: ${currentDate}\n`;
-  ticketText += `Hora: ${currentTime}\n`;
-
-  const ticketFilePath = path.join(__dirname, 'ticket.txt');
-  fs.writeFileSync(ticketFilePath, ticketText);
-  console.log(`Ticket generado en: ${ticketFilePath}`);
 }
 
-ipcMain.on('print-ticket', async (event, { ticketContent, totalAmount, currentDate, currentTime }) => {
-  const formattedTicketContent = ticketContent.map(item => ({
-    quantity: item.quantity,
-    product: item.productName,
-    price: item.price,
-    amount: item.subtotal
-  }));
-
-  await printOrGenerateTicket(formattedTicketContent, totalAmount, currentDate, currentTime);
+ipcMain.on('print-ticket', async (event, ticketData) => {
+  console.log('Recibida solicitud para imprimir ticket:', ticketData);
+  try {
+    const result = await printTicket(ticketData);
+    event.reply('print-ticket-response', result);
+  } catch (error) {
+    event.reply('print-ticket-response', { success: false, error: error.message });
+  }
 });
-
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 10000,
-    height: 1000,
+    width: 1200,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -134,9 +86,9 @@ app.on('window-all-closed', () => {
     connection.end((error) => {
       if (error) {
         console.error('Error al cerrar la conexión:', error);
-        return;
+      } else {
+        console.log('Conexión cerrada correctamente');
       }
-      console.log('Conexión cerrada correctamente');
       app.quit();
     });
   }

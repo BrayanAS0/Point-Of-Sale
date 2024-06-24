@@ -22,7 +22,8 @@
     "mysql2": "^3.10.0",
     "node-thermal-printer": "^4.4.2",
     "printer": "^0.4.0",
-    "thermal-printer": "^1.0.5"
+    "thermal-printer": "^1.0.5",
+    "unidecode": "^1.1.0"
   },
   "description": "",
   "devDependencies": {
