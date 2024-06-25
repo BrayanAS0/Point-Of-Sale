@@ -41,7 +41,9 @@ nav a {
 nav a svg {
   margin-right: 10px;
 }
-
+nav a:hover svg {
+  transform: scale(1.1);
+}
 /* Main Content Styles */
 main {
   flex: 1;

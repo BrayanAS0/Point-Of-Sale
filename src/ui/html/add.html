@@ -41,17 +41,15 @@
 
         <div class="sidebar">
             <form id="search-form">
-                <input type="text" id="code-input" placeholder="Código" required>                
-                <input type="text" id="name-input" placeholder="Nombre" required>
-                <input type="text" id="name-input" placeholder="Categoria" >
-                <input type="number" id="name-input" placeholder="Inventario" required>
-                <input type="number" id="name-input" placeholder="Cantidad minima" required>
-                <input type="number" id="name-input" placeholder="Precio Publico" required>
-                <input type="number" id="name-input" placeholder="Precio Provedor" required>
-                <button>Guardar</button>
+                <input type="text" id="code-input" name="code" placeholder="Código" required>
+                <input type="text" id="name-input" name="name" placeholder="Nombre" required>
+                <input type="text" id="category-input" name="category" placeholder="Categoría">
+                <input type="number" id="inventory-input" name="inventory" placeholder="Inventario" required>
+                <input type="number" id="min-quantity-input" name="minQuantity" placeholder="Cantidad mínima" required>
+                <input type="number" id="public-price-input" name="publicPrice" placeholder="Precio Público" required>
+                <input type="number" id="provider-price-input" name="providerPrice" placeholder="Precio Proveedor" required>
+                <button type="submit">Guardar</button>
             </form>
-
-
         </div>
         <div id="tag">
             <b>Codigo:</b>es el codigo del prodcuto y tiene que ser unico y no repetitivo

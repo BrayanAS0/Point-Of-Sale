@@ -6,11 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     const insufficientMoney = document.getElementById('insufficient-money');
-    const insufficientMoneyText = document.getElementById('insufficient-money-text');
     const insufficientMoneyInput = document.getElementById('insufficient-money-input');
     const insufficientMoneyButton = document.getElementById('insufficient-money-button');
 
-    const form = document.getElementById('search-form');
     const codeInput = document.getElementById('code-input');
     const nameInput = document.getElementById('name-input');
     const tableBody = document.getElementById('table-body');
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelModalChangeButton = document.getElementById('cancel-modal-change');
     let total = 0;
 
-    let selectedSuggestionIndex = -1;
     let selectedCodeSuggestionIndex = -1;
     let selectedNameSuggestionIndex = -1;
 

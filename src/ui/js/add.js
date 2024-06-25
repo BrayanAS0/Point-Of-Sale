@@ -1,14 +1,15 @@
 // Obtener referencias a los elementos del formulario
 const searchForm = document.getElementById('search-form');
 const codeInput = document.getElementById('code-input');
-const nameInput = document.querySelectorAll('#name-input')[0];
-const categoryInput = document.querySelectorAll('#name-input')[1];
-const inventoryInput = document.querySelectorAll('#name-input')[2];
-const minQuantityInput = document.querySelectorAll('#name-input')[3];
-const publicPriceInput = document.querySelectorAll('#name-input')[4];
-const providerPriceInput = document.querySelectorAll('#name-input')[5];
+const nameInput = document.getElementById('name-input');
+const categoryInput = document.getElementById('category-input');
+const inventoryInput = document.getElementById('inventory-input');
+const minQuantityInput = document.getElementById('min-quantity-input');
+const publicPriceInput = document.getElementById('public-price-input');
+const providerPriceInput = document.getElementById('provider-price-input');
 const tagElement = document.getElementById('tag');
 
+// El resto de tu código JavaScript permanece igual
 // Función para manejar el envío del formulario
 function handleFormSubmit(event) {
     event.preventDefault(); // Evitar el envío del formulario por defecto
