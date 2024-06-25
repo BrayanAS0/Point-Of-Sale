@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Realizar consulta a la base de datos MySQL
         const query = `SELECT * FROM productos WHERE ${inputElement === codeInput ? 'codigo_producto' : 'nombre'} LIKE ? LIMIT 5`;
-        connection.query(query, [`%${searchTerm}%`], (error, results) => {
+        connection.query(query, [`${searchTerm}%`], (error, results) => {
             if (error) {
                 console.error('Error al obtener sugerencias:', error);
                 return;
