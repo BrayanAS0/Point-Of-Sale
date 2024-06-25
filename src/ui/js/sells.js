@@ -170,7 +170,7 @@ function showTicket(ventaId) {
 
       const venta = results[0];
       const ticketContent = venta.ticket;
-      const totalAmount = parseFloat(venta.total); // Convertir a número
+      const totalAmount = parseFloat(venta.total);
       const currentDate = venta.fecha;
       const currentTime = venta.hora;
 
@@ -179,6 +179,10 @@ function showTicket(ventaId) {
       const ticketTotal = document.getElementById('ticket-total');
       const ticketDate = document.getElementById('ticket-date');
       const ticketTime = document.getElementById('ticket-time');
+
+      // Agregar el folio al título del ticket
+      const ticketTitle = document.querySelector('.ticket-content h3');
+      ticketTitle.textContent = `Ferretera - Folio: ${ventaId}`;
 
       // Dividir el contenido del ticket en filas
       const ticketRows = ticketContent.trim().split('\n');
@@ -200,7 +204,7 @@ function showTicket(ventaId) {
       if (!isNaN(totalAmount)) {
         ticketTotal.textContent = totalAmount.toFixed(2);
       } else {
-        ticketTotal.textContent = '0.00'; // Valor predeterminado si totalAmount no es un número válido
+        ticketTotal.textContent = '0.00';
       }
 
       ticketDate.textContent = currentDate;

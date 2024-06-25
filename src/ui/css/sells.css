@@ -1,8 +1,9 @@
+/* Global Styles */
 body {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
 }
 
 .container {
@@ -10,10 +11,11 @@ body {
   height: 100vh;
 }
 
+/* Navigation Styles */
 nav {
   width: 200px;
-  background-color: #333;
-  color: #fff;
+  background-color: #2c3e50;
+  color: #ecf0f1;
   min-height: 100%;
 }
 
@@ -21,21 +23,26 @@ nav ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  width: 100%;
 }
 
 nav li {
-  padding: 10px;
+  padding: 15px;
+  border-bottom: 1px solid #34495e;
 }
 
 nav a {
-  color: #fff;
+  color: #ecf0f1;
   text-decoration: none;
-  width: 100%;
-  display: inline-block;
-  font-size: 25px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
+nav a svg {
+  margin-right: 10px;
+}
+
+/* Main Content Styles */
 main {
   flex: 1;
   padding: 20px;
@@ -43,211 +50,232 @@ main {
   flex-direction: column;
 }
 
-.search-container {
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.search-container input {
-  padding: 10px;
-  font-size: 16px;
-  width: 200px;
-  margin-right: 10px;
-}
-
-#search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1;
-}
-
-#search-results li {
-  padding: 10px;
-  cursor: pointer;
-}
-
-#search-results li:hover {
-  background-color: #f0f0f0;
-}
-
+/* Table Styles */
 table {
   width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #fff;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
-  border: 1px solid #000000;
-  padding: 10px;
+  padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
-  font-size: 20px;
-  box-sizing: border-box;
-  position: relative;
-  word-wrap: break-word;
-}
-td{
-border: 1px solid #000;}
-tr {
-  background-color: #ddd;
-  box-sizing: border-box;
-}
-th{
-  background-color: #d4d4d4;}
-th:nth-child(1), td:nth-child(1) {
-  width: 10%;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-th:nth-child(2), td:nth-child(2) {
-  width: 20%;
+th {
+  background-color: #3498db;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-th:nth-child(3), td:nth-child(3) {
-  text-align: center;
-  width: 20;
+tr:nth-child(even) {
+  background-color: #f8f8f8;
 }
 
-th:nth-child(4), td:nth-child(4) {
-  text-align: center;
-  width: 20%;
+tr:hover {
+  background-color: #e8f4f8;
 }
 
-th:nth-child(5), td:nth-child(5) {
-  width: 20%;
-}
-
-
-td input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: none;
-  background-color: white;
-  font-size: inherit;
-  font-family: inherit;
-}
-
-.fila-resaltada {
-  background-color: red;
-  color: rgb(0, 0, 0);
-}
+/* Search Container Styles */
 .search-container {
   margin-bottom: 20px;
-  position: relative;
 }
 
 .search-container input {
-  padding: 10px;
+  padding: 10px 15px;
   font-size: 16px;
-  width: 200px;
-  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 300px;
 }
 
-#search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1;
-}
-
-#search-results li {
-  padding: 10px;
-  cursor: pointer;
-}
-
-#search-results li:hover {
-  background-color: #c81212;
-}
-#search-results li.selected {
-  background-color: #c81212;
-}
-
-.ticket-content {
-  z-index: 2;
-  position: absolute;
+/* Ticket Styles */
+#ticket-container {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  margin: auto;
-  border: 3px solid rgb(0, 0, 0);
-  border-radius: 5px;
-  width: 50%;
-  height: 90%;
-  background-color: #ffffff;
-  font-size: 20px;
-  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
-#close-button{
-  position: absolute;
-  top: 0;
 
+.ticket-content {
+  position: absolute;
   right: 0;
-
-width: 40px;
-  font-size: 20px;
-  box-sizing: border-box;
- 
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
-#trash{
+
+.ticket-content h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.ticket-content table {
   width: 100%;
-  height: 100%;
-  position: absolute;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  margin-top: 15px;
 }
-table {
-  width: 100%;
 
+.ticket-content th, .ticket-content td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
 
-  margin-top: 10px;
+.ticket-content th {
+  background-color: #f9f5f5;
+  color: black;
+  font-weight: bold;
 }
-.ticket-content th, td {
-  padding: 5px;
-  text-align: center;
-  font-size: 11px;
-}
-th{
-  border-bottom: 1px solid #000000;
-  border-top: 1px solid #000000;
-}
+
 .total {
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: right;
+  font-weight: bold;
 }
-.footer {
-  margin-top: 10px;
+
+.footer, .date-time {
+  margin-top: 15px;
   text-align: center;
+  color: #7f8c8d;
 }
-.date-time {
-  margin-top: 10px;
-  text-align: center;
-  font-size: 10px;
+
+#close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
-#insufficient-money-text{
+
+#close-button:hover {
+  background-color: #c0392b;
+}
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
-  font-size: 20px;
-  margin-top: 10px;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-secondary {
+  background-color: #2ecc71;
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background-color: #27ae60;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+/* Estilo mejorado para el botón de cerrar del ticket */
+#close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#close-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.1);
+}
+
+/* Estilos para botones en la tabla */
+table .btn {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Estilos para botones en el formulario de búsqueda */
+.search-container .btn {
+  margin-left: 10px;
+}
+
+/* Estilos para botones deshabilitados */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Ajuste del estilo de entrada de búsqueda para que coincida con los botones */
+.search-container input {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 300px;
+  transition: border-color 0.3s ease;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+.ticket-content h3 {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+.ticket-header th {
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
 }

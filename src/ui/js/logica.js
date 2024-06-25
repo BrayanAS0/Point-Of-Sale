@@ -510,7 +510,7 @@ function handleKeyboardNavigation(event, inputElement) {
         return ticket;
     }
     
-    async function generateTicket() {
+    async function generateTicket(printCopy = false) {
         try {
             const ticketContent = Array.from(tableBody.querySelectorAll('tr')).map(row => {
                 const productName = row.cells[1].textContent;
@@ -532,36 +532,64 @@ function handleKeyboardNavigation(event, inputElement) {
             const currentDate = new Date().toLocaleDateString();
             const currentTime = new Date().toLocaleTimeString();
             const lastVentaId = await obtenerUltimoIdVenta();
-            const ventaId = lastVentaId + 1; // Incrementamos el ID para la nueva venta
+            const ventaId = lastVentaId + 1;
     
-            console.log('Enviando datos del ticket al proceso principal para impresión...');
-            ipcRenderer.send('print-ticket', { 
-                ticketContent, 
-                totalAmount, 
-                receivedAmount,
-                change,
-                currentDate,   
-                currentTime,
-                ventaId 
-            });
+            await new Promise((resolve, reject) => {
+                ipcRenderer.send('print-ticket', { 
+                    ticketContent, 
+                    totalAmount, 
+                    receivedAmount,
+                    change,
+                    currentDate,   
+                    currentTime,
+                    ventaId,
+                    isCopy: false
+                });
     
-            return new Promise((resolve, reject) => {
                 ipcRenderer.once('print-ticket-response', (event, response) => {
                     if (response.success) {
-                        console.log('Ticket impreso correctamente');
+                        console.log('Original ticket printed successfully');
                         resolve();
                     } else {
-                        console.error('Error al imprimir el ticket:', response.error);
+                        console.error('Error printing original ticket:', response.error);
                         reject(new Error(response.error));
                     }
                 });
             });
+    
+            if (printCopy) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+    
+                console.log('Printing copy ticket...');
+                await new Promise((resolve, reject) => {
+                    ipcRenderer.send('print-ticket', { 
+                        ticketContent, 
+                        totalAmount, 
+                        receivedAmount,
+                        change,
+                        currentDate,   
+                        currentTime,
+                        ventaId,
+                        isCopy: true
+                    });
+    
+                    ipcRenderer.once('print-ticket-response', (event, response) => {
+                        if (response.success) {
+                            console.log('Copy ticket printed successfully');
+                            resolve();
+                        } else {
+                            console.error('Error printing copy ticket:', response.error);
+                            reject(new Error(response.error));
+                        }
+                    });
+                });
+            }
+    
         } catch (error) {
-            console.error('Error al generar el ticket:', error);
+            console.error('Error generating ticket:', error);
             throw error;
         }
     }
-    
     // Agregar un listener para recibir la respuesta del proceso principal
     ipcRenderer.on('print-ticket-response', (event, response) => {
         if (response.success) {
@@ -570,7 +598,21 @@ function handleKeyboardNavigation(event, inputElement) {
             console.error('Error al imprimir el ticket:', response.error);
         }
     });
-    
+    document.getElementById("finish-sale-with-two-tickets").addEventListener('click', async function() {
+        try {
+            await updateProductQuantities();
+            await saveData();
+            await generateTicket(true);  // true para imprimir una copia
+            tableBody.innerHTML = '';
+            total = 0;
+            totalDisplay.textContent = '$0.00';
+            modalChange.hidden = true;
+            focusCodeInput();
+        } catch (error) {
+            console.error('Error al finalizar la venta:', error);
+            // Aquí puedes mostrar un mensaje de error al usuario si lo deseas
+        }
+    });
     function calculateTotal() {
         const tableContent = Array.from(tableBody.querySelectorAll('tr'));
         let total = 0;

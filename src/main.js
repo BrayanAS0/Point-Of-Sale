@@ -41,16 +41,27 @@ ipcMain.on('print-ticket', async (event, ticketData) => {
   try {
     const pythonScript = path.join(__dirname, 'print_ticket.py');
     
-    const { ventaId, totalAmount, receivedAmount, change } = ticketData;
+    const { ventaId, totalAmount, receivedAmount, change, isCopy } = ticketData;
     
-    exec(`python "${pythonScript}" ${ventaId} ${totalAmount} ${receivedAmount} ${change}`, (error, stdout, stderr) => {
-      if (error || stderr) {
-        event.reply('print-ticket-response', { success: false, error: error ? error.message : stderr });
-      } else {
-        event.reply('print-ticket-response', { success: true });
+    const command = `python "${pythonScript}" ${ventaId} ${totalAmount} ${receivedAmount} ${change} ${isCopy}`;
+    console.log('Executing command:', command);
+    
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing Python script: ${error.message}`);
+        event.reply('print-ticket-response', { success: false, error: error.message });
+        return;
       }
+      if (stderr) {
+        console.error(`Python script stderr: ${stderr}`);
+        event.reply('print-ticket-response', { success: false, error: stderr });
+        return;
+      }
+      console.log(`Python script stdout: ${stdout}`);
+      event.reply('print-ticket-response', { success: true });
     });
   } catch (error) {
+    console.error('Error in print-ticket handler:', error);
     event.reply('print-ticket-response', { success: false, error: error.message });
   }
 });
