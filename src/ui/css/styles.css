@@ -237,7 +237,7 @@ td input {
 
 .modal-button-2 {
   display: inline-block;
-  width: 33.333%;
+  width: 25%;
   transition-property: background-color;
   transition-duration: 1s;
   height: 100%;

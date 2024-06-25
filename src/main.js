@@ -38,10 +38,18 @@ function printTicket(ticketData) {
 }
 
 ipcMain.on('print-ticket', async (event, ticketData) => {
-  console.log('Recibida solicitud para imprimir ticket:', ticketData);
   try {
-    const result = await printTicket(ticketData);
-    event.reply('print-ticket-response', result);
+    const pythonScript = path.join(__dirname, 'print_ticket.py');
+    
+    const { ventaId, totalAmount, receivedAmount, change } = ticketData;
+    
+    exec(`python "${pythonScript}" ${ventaId} ${totalAmount} ${receivedAmount} ${change}`, (error, stdout, stderr) => {
+      if (error || stderr) {
+        event.reply('print-ticket-response', { success: false, error: error ? error.message : stderr });
+      } else {
+        event.reply('print-ticket-response', { success: true });
+      }
+    });
   } catch (error) {
     event.reply('print-ticket-response', { success: false, error: error.message });
   }

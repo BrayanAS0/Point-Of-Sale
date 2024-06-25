@@ -1,8 +1,7 @@
 import sys
 import mysql.connector
 import win32print
-import win32ui
-from escpos.constants import ESC, GS, PAPER_FULL_CUT, PAPER_PART_CUT
+from escpos.constants import ESC, GS
 import textwrap
 import unidecode
 import time
@@ -20,7 +19,7 @@ def get_ticket_data(venta_id):
     cursor = connection.cursor(dictionary=True)
     
     query = "SELECT * FROM ventas WHERE id_venta = %s"
-    cursor.execute(query, (venta_id+1,))
+    cursor.execute(query, (venta_id,))
     venta = cursor.fetchone()
     
     cursor.close()
@@ -41,13 +40,11 @@ def send_raw_data(printer_name, data):
     finally:
         win32print.ClosePrinter(hPrinter)
 
-def create_and_print_ticket(venta_id):
-    # Pequeña demora para asegurar que la venta se haya guardado
+def create_and_print_ticket(venta_id, total_amount, received_amount, change):
     time.sleep(0.5)
     
     venta = get_ticket_data(venta_id)
     if not venta:
-        print(f"No se encontró la venta con ID: {venta_id}")
         return
     
     printer_name = win32print.GetDefaultPrinter()
@@ -63,7 +60,7 @@ def create_and_print_ticket(venta_id):
         + f"Fecha: {venta['fecha']}\n".encode('cp437')
         + f"Hora: {venta['hora']}\n".encode('cp437')
         + f"Folio: {venta['id_venta']}\n".encode('cp437')
-        + unidecode.unidecode("Producto                 Cant   Precio   Importe\n").encode('cp437')
+        + unidecode.unidecode("Cant Producto               Precio   Importe\n").encode('cp437')
         + b"-" * 48 + b"\n"
     )
     
@@ -73,38 +70,38 @@ def create_and_print_ticket(venta_id):
             parts = line.split(' | ')
             if len(parts) == 6:
                 _, name, _, quantity, price, subtotal = parts
-                product_lines = textwrap.wrap(unidecode.unidecode(name), 26)
+                product_lines = textwrap.wrap(unidecode.unidecode(name), 22)
                 
-                first_line = f"{product_lines[0].ljust(26)} {quantity.rjust(4)} {price.rjust(8)} {subtotal.rjust(8)}\n".encode('cp437')
+                first_line = f"{quantity.rjust(4)} {product_lines[0].ljust(22)} {price.rjust(8)} {subtotal.rjust(8)}\n".encode('cp437')
                 data += first_line
                 
                 for additional_line in product_lines[1:]:
-                    data += f"{additional_line.ljust(26)}\n".encode('cp437')
-    
+                    data += f"     {additional_line.ljust(22)}\n".encode('cp437')
+
     data += (
         b"-" * 48 + b"\n"
         + ESC + b"a" + b"\x02"  # Right align
-        + f"Total: ${venta['total']:.2f}\n\n".encode('cp437')
+        + f"Total: ${float(total_amount):.2f}\n".encode('cp437')
+        + f"Recibido: ${float(received_amount):.2f}\n".encode('cp437')
+        + f"Cambio: ${float(change):.2f}\n".encode('cp437')
+        + b"\n"
         + ESC + b"a" + b"\x01"  # Center align
         + unidecode.unidecode("Gracias por su compra!\n\n").encode('cp437')
-        + ESC + b"d" + b"\x03"  # Feed 5 lines (aproximadamente 1 cm)
+        + ESC + b"d" + b"\x03"  # Feed 3 lines
         + GS + b"V\x00"  # Partial cut
     )
     
-    try:
-        send_raw_data(printer_name, data)
-        print("Ticket impreso correctamente.")
-    except Exception as e:
-        print(f"Error al imprimir: {e}")
+    send_raw_data(printer_name, data)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Uso: python script.py <venta_id>")
+    if len(sys.argv) != 5:
         sys.exit(1)
     
     try:
         venta_id = int(sys.argv[1])
-        create_and_print_ticket(venta_id)
+        total_amount = float(sys.argv[2])
+        received_amount = float(sys.argv[3])
+        change = float(sys.argv[4])
+        create_and_print_ticket(venta_id, total_amount, received_amount, change)
     except ValueError:
-        print(f"Error: El ID de venta debe ser un número entero. Recibido: {sys.argv[1]}")
         sys.exit(1)

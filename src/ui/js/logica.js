@@ -526,15 +526,20 @@ function handleKeyboardNavigation(event, inputElement) {
             });
     
             const totalAmount = calculateTotal();
+            const receivedAmount = parseFloat(receivedAmountInput.value) || totalAmount;
+            const change = (receivedAmount - totalAmount).toFixed(2);
     
             const currentDate = new Date().toLocaleDateString();
             const currentTime = new Date().toLocaleTimeString();
-            const ventaId = await obtenerUltimoIdVenta();
+            const lastVentaId = await obtenerUltimoIdVenta();
+            const ventaId = lastVentaId + 1; // Incrementamos el ID para la nueva venta
     
             console.log('Enviando datos del ticket al proceso principal para impresión...');
             ipcRenderer.send('print-ticket', { 
                 ticketContent, 
                 totalAmount, 
+                receivedAmount,
+                change,
                 currentDate,   
                 currentTime,
                 ventaId 
