@@ -96,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Si no existe una fila con el mismo código, crear una nueva fila
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${code}</td>
-                <td>${name}</td>
+                <td class="editable">${code}</td>
+                <td class="editable">${name}</td>
                 <td>${category}</td>
                 <td class="editable">${quantity}</td>
                 <td class="editable">$${price.toFixed(2)}</td>
@@ -151,7 +151,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
         hideSuggestions();
     }
+// Función para desplazar la tabla al final
+function scrollToBottom() {
+    const tableContainer = document.querySelector('.table-container');
+    tableContainer.scrollTop = tableContainer.scrollHeight;
+}
 
+// Función para agregar una nueva fila a la tabla
+function addNewRow(rowData) {
+    const tableBody = document.getElementById('table-body');
+    const newRow = document.createElement('tr');
+    newRow.classList.add('new-entry');
+
+    // Añadir celdas a la nueva fila
+    for (let i = 0; i < 7; i++) {
+        const cell = document.createElement('td');
+        cell.textContent = rowData[i] || '';
+        newRow.appendChild(cell);
+    }
+
+    // Agregar la nueva fila al cuerpo de la tabla
+    tableBody.appendChild(newRow);
+
+    // Desplazar al final de la tabla
+    scrollToBottom();
+
+    // Eliminar la clase 'new-entry' después de la animación
+    setTimeout(() => {
+        newRow.classList.remove('new-entry');
+    }, 2000);
+}
+
+
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            scrollToBottom();
+        }
+    });
+});
+
+// Configurar el observador
+observer.observe(tableBody, { childList: true });
     function hideSuggestions() {
         const suggestionsList = document.querySelectorAll('.suggestions-container');
         suggestionsList.forEach(list => {
